@@ -71,8 +71,8 @@ def inspect(data: Generator[DataSet, None, None], output: str):
 
 
 def __dump_stats(data_set: DataSet, logger: Logger, step: str):
-    description = data_set.describe()
-    logger.save_csv(description, step + '-description')
+    description = data_set.describe().to_dict()
+    logger.save_json(description, step + '-description')
 
     records = data_set.records
     labels = data_set.labels
