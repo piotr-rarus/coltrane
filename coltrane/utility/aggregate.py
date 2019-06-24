@@ -1,4 +1,5 @@
 import numpy as np
+from collections import OrderedDict
 
 
 """
@@ -25,18 +26,17 @@ def stats(stats):
         Aggregated stats.
     """
 
-    summary = {}
+    summary = OrderedDict()
 
-    for label, measures in stats.items():
-        summary[label] = {}
+    for metric, values in stats.items():
+        stats = OrderedDict()
 
-        for measure, values in measures.items():
-            summary[label][measure] = {}
+        stats['mean'] = np.mean(values)
+        stats['min'] = np.min(values)
+        stats['max'] = np.max(values)
+        stats['std'] = np.std(values)
 
-            summary[label][measure]["std"] = np.std(values)
-
-            percentiles = np.percentile(values, [0, 25, 50, 75, 100])
-            summary[label][measure]["percentiles"] = percentiles
+        summary[metric] = stats
 
     return summary
 
@@ -62,20 +62,12 @@ def group_stats(stats):
     grouped = {}
 
     for stat in stats:
-        for label, measures in stat.items():
+        for metric, value in stat.items():
 
-            if type(measures) is not dict:
-                continue
+            if metric not in grouped:
+                grouped[metric] = []
 
-            for measure, value in measures.items():
-
-                if label not in grouped:
-                    grouped[label] = {}
-
-                if measure not in grouped[label]:
-                    grouped[label][measure] = []
-
-                grouped[label][measure].append(value)
+            grouped[metric].append(value)
 
     return grouped
 
@@ -97,14 +89,14 @@ def performance(performance):
         Aggregated performance stats.
     """
 
-    summary = {}
+    summary = OrderedDict()
 
-    for label, measures in performance.items():
-        summary[label] = {}
-        summary[label]['std'] = np.std(measures)
-
-        percentiles = np.percentile(measures, [0, 25, 50, 75, 100])
-        summary[label]['percentiles'] = percentiles
+    for label, values in vars(performance).items():
+        summary[label] = OrderedDict()
+        summary[label]['mean'] = np.mean(values)
+        summary[label]['min'] = np.min(values)
+        summary[label]['max'] = np.max(values)
+        summary[label]['std'] = np.std(values)
 
     return summary
 

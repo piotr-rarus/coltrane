@@ -1,14 +1,13 @@
 from collections import OrderedDict
+from typing import List, Tuple
+
 from lazy_property import LazyProperty
-
-# from .extension import tuple_ext
-from .file.io.base import DataSet
-
 from sklearn.pipeline import Pipeline
+
+from .file.io.base import DataSet
 
 
 class Batch():
-    # ! document this shit
 
     def __init__(
         self,
@@ -16,13 +15,13 @@ class Batch():
         data: DataSet,
         pipeline: Pipeline,
         selection,
-        validation
+        metrics: List[Tuple]
     ):
 
         self.data = data
         self.selection = selection
         self.pipeline = pipeline
-        self.validation = validation
+        self.metrics = metrics
 
     @LazyProperty
     def pprint(self):
@@ -35,8 +34,7 @@ class Batch():
             Outputs nicely written pipeline configuration.
         """
 
-        config = OrderedDict()
-
+        config = {}
         config['data'] = self.data.pprint
 
         config['selection'] = {
@@ -49,6 +47,6 @@ class Batch():
         config['pipeline'] = {}
 
         for step in self.pipeline:
-            config['pipeline'][step.__class__.__name__] = 'foo'
+            config['pipeline'][step.__class__.__name__] = vars(step)
 
         return config

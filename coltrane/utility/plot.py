@@ -91,21 +91,19 @@ def stats(stats, logger: Logger):
         Logger instance used to dump a plot.
     """
 
-    for label, measures in stats.items():
-        data_frame = pd.DataFrame()
+    data_frame = pd.DataFrame()
 
-        for measure, values in measures.items():
-            if measure not in ['support']:
-                data_frame[measure] = values
+    for metric, values in stats.items():
+        data_frame[metric] = values
 
-        plt.figure(clear=True)
+    plt.figure(clear=True)
 
-        figure = sns.boxenplot(data=data_frame).figure
+    figure = sns.boxenplot(data=data_frame).figure
 
-        plt.title(label)
+    plt.title('Metrics')
 
-        logger.save_fig(figure, 'stats - ' + label)
-        plt.close('all')
+    logger.save_fig(figure, 'metrics')
+    plt.close('all')
 
 
 def confusion_matrix(

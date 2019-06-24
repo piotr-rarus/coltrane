@@ -1,21 +1,42 @@
-from sklearn.metrics import classification_report
+from sklearn.metrics import (accuracy_score, f1_score, precision_score,
+                             recall_score)
 from sklearn.model_selection import RepeatedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
-from coltrane import Batch, csv, execute, inspect
-
-"""
-Container for filepath constants.
-
-"""
+from coltrane import Batch, csv
+from coltrane.classification import Inspector, Processor
 
 __LOGS = 'logs'
 __DATA_IRIS = 'tests\\data\\iris.csv'
 
 __RANDOM_STATE = 45625461
+
+
+def metrics():
+    return [
+            accuracy_score,
+            (
+                precision_score,
+                {
+                    'average': 'macro'
+                }
+            ),
+            (
+                recall_score,
+                {
+                    'average': 'macro'
+                }
+            ),
+            (
+                f1_score,
+                {
+                    'average': 'macro'
+                }
+            )
+        ]
 
 
 def batches():
@@ -33,12 +54,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        validation=(
-            classification_report,
-            {
-                'output_dict': True
-            }
-        )
+        metrics=metrics()
     )
 
     yield Batch(
@@ -54,12 +70,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        validation=(
-            classification_report,
-            {
-                'output_dict': True
-            }
-        )
+        metrics=metrics()
     )
 
 
@@ -68,8 +79,10 @@ def data_set():
 
 
 def test_inspection():
-    inspect(data_set, output=__LOGS)
+    inspector = Inspector()
+    inspector.inspect(data_set, output=__LOGS)
 
 
 def test_classification():
-    execute(batches, output=__LOGS)
+    processor = Processor()
+    processor.process(batches, output=__LOGS)

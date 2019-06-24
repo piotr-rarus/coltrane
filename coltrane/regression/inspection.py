@@ -18,12 +18,10 @@ class Inspector(Base):
         records = data_set.records
         labels = data_set.labels
 
-        plot.labels_distribution(labels, logger, 'balance')
+        # TODO: histogram
 
         stats = {}
         records_count, attributes_count = records.shape
-
-        stats['balance'] = aggregate.balance(labels)
 
         stats['records'] = {}
         stats['records']['count'] = records_count
@@ -47,9 +45,4 @@ class Inspector(Base):
 
         logger.add_entry('stats', stats)
 
-        plot.features_distribution(
-            data_set.records,
-            data_set.labels,
-            logger,
-            'features-distribution'
-        )
+        # TODO: plot histogram
