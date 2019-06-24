@@ -41,10 +41,9 @@ def stats(stats):
     return summary
 
 
-def group_stats(stats):
+def group_metrics(stats):
     """
-    Groups evaluation metric values from each split,
-    by label, then by used metric.
+    Groups evaluation metric values from each split, by metrics.
 
     Parameters
     ----------

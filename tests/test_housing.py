@@ -30,7 +30,9 @@ def batches():
             random_state=__RANDOM_STATE
         ),
         metrics=[
-            r2_score
+            r2_score,
+            mean_squared_error,
+            max_error
         ]
     )
 
@@ -48,7 +50,9 @@ def batches():
             random_state=__RANDOM_STATE
         ),
         metrics=[
-            r2_score
+            r2_score,
+            mean_squared_error,
+            max_error
         ]
     )
 

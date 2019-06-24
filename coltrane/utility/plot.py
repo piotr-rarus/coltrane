@@ -9,6 +9,16 @@ from sklearn.decomposition import PCA
 sns.set()
 
 
+def __disposable_plot(func):
+    def wrapper(*args, **kwargs):
+        plt.figure(clear=True)
+        func(*args, **kwargs)
+        plt.close('all')
+
+    return wrapper
+
+
+@__disposable_plot
 def labels_distribution(labels, logger: Logger, plot_name):
     """
     Plots and dumps labels distribution.
@@ -24,16 +34,22 @@ def labels_distribution(labels, logger: Logger, plot_name):
         Dumped file name.
     """
 
-    plt.figure(clear=True)
-
     figure = sns.countplot(x=labels).get_figure()
-
     plt.title('Class balance')
 
     logger.save_fig(figure, plot_name)
-    plt.close('all')
 
 
+@__disposable_plot
+def distribution(values, logger: Logger, plot_name):
+
+    figure = sns.distplot(values).get_figure()
+    plt.title(plot_name)
+
+    logger.save_fig(figure, plot_name)
+
+
+@__disposable_plot
 def features_distribution(records, labels, logger: Logger, plot_name):
     """
     Plots and dumps features distribution.
@@ -52,8 +68,6 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     plot_name : string
         Dumped file name.
     """
-
-    plt.figure(clear=True)
 
     if records.shape[1] > 2:
         decomposer = PCA(n_components=2)
@@ -76,34 +90,31 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     plt.title('Features distribution - PCA')
 
     logger.save_fig(figure, plot_name)
-    plt.close('all')
 
 
-def stats(stats, logger: Logger):
+@__disposable_plot
+def metrics(metrics, logger: Logger):
     """
     Plots and dumps aggregated metrics.
 
     Parameters
     ----------
-    stats : dict
-        Regrouped stats dictionary, by label, by measure.
+    metrics : dict
+        Regrouped metrics dictionary, by label, by measure.
     logger : Logger
         Logger instance used to dump a plot.
     """
 
     data_frame = pd.DataFrame()
 
-    for metric, values in stats.items():
+    for metric, values in metrics.items():
         data_frame[metric] = values
-
-    plt.figure(clear=True)
 
     figure = sns.boxenplot(data=data_frame).figure
 
     plt.title('Metrics')
 
     logger.save_fig(figure, 'metrics')
-    plt.close('all')
 
 
 def confusion_matrix(
@@ -128,19 +139,31 @@ def confusion_matrix(
         Logger instance used to dump a plot.
     """
 
-    plt.figure(clear=True)
-
     confusion_matrix = pd.DataFrame(
         confusion_matrix,
         index=classes,
         columns=classes
     )
 
-    figure = sns.heatmap(confusion_matrix, annot=True).get_figure()
+    heatmap(
+        confusion_matrix,
+        logger,
+        plot_name='confusion-matrix',
+        ylabel='Ground truth',
+        xlabel='Predicted'
+    )
 
-    plt.title('Confusion matrix')
-    plt.ylabel('Ground truth')
-    plt.xlabel('Predicted')
 
-    logger.save_fig(figure, 'confusion_matrix')
-    plt.close('all')
+@__disposable_plot
+def heatmap(
+    data: pd.DataFrame,
+    logger: Logger,
+    plot_name: str,
+    ylabel='',
+    xlabel=''
+):
+
+    figure = sns.heatmap(data, annot=True).get_figure()
+
+    plt.title(plot_name)
+    logger.save_fig(figure, plot_name)

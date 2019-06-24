@@ -39,7 +39,11 @@ class DataSet(ABC):
         pass
 
     @abstractproperty
-    def records(self):
+    def data(self):
+        pass
+
+    @abstractproperty
+    def X(self):
         """
         This prop should return array of records.
         """
@@ -47,9 +51,9 @@ class DataSet(ABC):
         pass
 
     @abstractproperty
-    def labels(self):
+    def y(self):
         """
-        This prop should return array of labels.
+        This prop should return array of ground truth values.
         """
 
         pass

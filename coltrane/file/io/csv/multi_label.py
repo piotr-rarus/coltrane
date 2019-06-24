@@ -8,7 +8,7 @@ class DataSet(base.DataSet):
     Handles old school data sets.
     Data set should be .csv table.
     First row for the header.
-    Class label in the last column
+    Ground truth value in the last column.
     First column for the record ID.
     """
 
@@ -27,12 +27,12 @@ class DataSet(base.DataSet):
         super().__init__(path, encoder)
 
     @LazyWritableProperty
-    def labels(self):
-        return self.__extract_labels()
+    def y(self):
+        return self.__extract_y()
 
-    def __extract_labels(self):
-        labels = self.__data_set.iloc[:, -1].values
-        return list([label.split(' ') for label in labels])
+    def __extract_y(self):
+        y = self.__data_set.iloc[:, -1].values
+        return list([y.split(' ') for label in y])
 
     @LazyProperty
     def pprint(self):

@@ -1,4 +1,5 @@
-import numpy as np
+from collections import OrderedDict
+
 from austen import Logger
 
 from ..file.io.base import DataSet
@@ -11,45 +12,18 @@ class Inspector(Base):
     def __init__(self):
         return super().__init__()
 
-    def __calc_stats(self, data_set: DataSet, logger: Logger):
-        description = data_set.describe().to_dict()
-        logger.save_json(description, 'description')
+    def __post_inspect(self, data_set: DataSet, logger: Logger):
 
-        records = data_set.records
-        labels = data_set.labels
+        records = data_set.X
+        labels = data_set.y
 
+        summary = OrderedDict()
+        summary['balance'] = aggregate.balance(labels)
         plot.labels_distribution(labels, logger, 'balance')
 
-        stats = {}
-        records_count, attributes_count = records.shape
-
-        stats['balance'] = aggregate.balance(labels)
-
-        stats['records'] = {}
-        stats['records']['count'] = records_count
-
-        missing_values = np.count_nonzero(data_set.isna())
-        stats['records']['missing-values'] = missing_values
-
-        numerical = []
-        categorical = []
-
-        for attribute, feature in zip(data_set.attributes, records.T):
-            is_categorical = any(type(value) is str for value in feature)
-
-            if is_categorical:
-                categorical.append(attribute)
-            else:
-                numerical.append(attribute)
-
-        stats['attributes-categorical'] = categorical
-        stats['attributes-numerical'] = numerical
-
-        logger.add_entry('stats', stats)
-
         plot.features_distribution(
-            data_set.records,
-            data_set.labels,
+            records,
+            labels,
             logger,
-            'features-distribution'
+            'distribution'
         )

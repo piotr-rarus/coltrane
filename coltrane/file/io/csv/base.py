@@ -12,7 +12,7 @@ class DataSet(base.DataSet):
     Handles old school data sets.
     Data set should be .csv table.
     First row for the header.
-    Class label in the last column
+    Ground truth value in the last column.
     First column for the record ID.
     """
 
@@ -33,22 +33,26 @@ class DataSet(base.DataSet):
         return pd.read_csv(self.path)
 
     @LazyProperty
+    def data(self) -> pd.DataFrame:
+        return self.__data_set.iloc[:, 1:]
+
+    @LazyProperty
     def name(self):
         return os.path.splitext(os.path.basename(self.path))[0]
 
     @LazyWritableProperty
-    def records(self):
-        return self.__extract_records()
+    def X(self):
+        return self.__extract_X()
 
-    def __extract_records(self):
+    def __extract_X(self):
         return self.__data_set.iloc[:, 1:-1].values
 
     @abstractproperty
-    def labels(self):
+    def y(self):
         pass
 
     @abstractmethod
-    def __extract_labels(self):
+    def __extract_y(self):
         pass
 
     @LazyProperty
@@ -83,8 +87,8 @@ class DataSet(base.DataSet):
 
         def wrapper(self, *args, **kwargs):
             func(self)
-            self.records = self.__extract_records()
-            self.labels = self.__extract_labels()
+            self.X = self.__extract_X()
+            self.y = self.__extract_y()
             return
 
         return wrapper

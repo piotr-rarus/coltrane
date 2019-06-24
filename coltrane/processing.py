@@ -115,7 +115,7 @@ class Processor(ABC):
         pipeline = batch.pipeline
         metrics = batch.metrics
 
-        splits = selection.split(data.records, data.labels)
+        splits = selection.split(data.X, data.y)
         splits_iter = enumerate(tqdm(splits, desc='Splits'))
 
         stats = []
@@ -141,7 +141,7 @@ class Processor(ABC):
                     stats.append(evaluation)
                     performance.append(split_performance)
 
-            grouped_stats = aggregate.group_stats(stats)
+            grouped_stats = aggregate.group_metrics(stats)
 
             aggregated_metrics = aggregate.stats(grouped_stats)
             aggregated_performance = aggregate.performance(performance)
@@ -149,7 +149,7 @@ class Processor(ABC):
             logger.add_entry('summary', aggregated_metrics)
             logger.add_entry('performance', aggregated_performance)
 
-            plot.stats(grouped_stats, logger)
+            plot.metrics(grouped_stats, logger)
 
     def __process_split(
         self,
@@ -160,27 +160,27 @@ class Processor(ABC):
         test_index: List[int],
         logger: Logger
     ):
-        train_records = data.records[train_index]
-        train_labels = data.labels[train_index]
+        train_X = data.X[train_index]
+        train_y = data.y[train_index]
 
-        test_records = data.records[test_index]
-        test_labels = data.labels[test_index]
+        test_X = data.X[test_index]
+        test_y = data.y[test_index]
 
         # TODO: this looks ugly, maybe some wrapper?
         start = timer()
-        pipeline.fit(train_records, train_labels)
+        pipeline.fit(train_X, train_y)
         end = timer()
         dt_fit = end - start
 
         start = timer()
-        pred_labels = pipeline.predict(test_records)
+        pred_y = pipeline.predict(test_X)
         end = timer()
         dt_predict = end - start
-        dt_predict_record = dt_predict / len(pred_labels)
+        dt_predict_record = dt_predict / len(pred_y)
 
         performance = SplitPerformance(dt_fit, dt_predict, dt_predict_record)
 
-        evaluation = self.__evaluate_metrics(test_labels, pred_labels, metrics)
+        evaluation = self.__evaluate_metrics(test_y, pred_y, metrics)
 
         logger.add_entry('metrics', evaluation)
         logger.add_entry('performance', performance.__dict__)
