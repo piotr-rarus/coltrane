@@ -64,6 +64,14 @@ class Processor(ABC):
     def __init__(self):
         return super().__init__()
 
+    @abstractmethod
+    def __post_split(self, test_y, pred_y, labels, logger: Logger):
+        pass
+
+    @abstractmethod
+    def __post_batch():
+        pass
+
     def process(
         self,
         batches: Generator[Batch, None, None],
@@ -151,6 +159,8 @@ class Processor(ABC):
 
             plot.metrics(grouped_stats, logger)
 
+        self.__post_batch()
+
     def __process_split(
         self,
         data: DataSet,
@@ -185,6 +195,8 @@ class Processor(ABC):
         logger.add_entry('metrics', evaluation)
         logger.add_entry('performance', performance.__dict__)
         logger.save_obj(pipeline, 'pipeline')
+
+        self.__post_split(test_y, pred_y, set(data.y), logger)
 
         return evaluation, performance
 
