@@ -1,6 +1,8 @@
-from abc import ABC, abstractproperty, abstractmethod
+import json
+from abc import ABC, abstractmethod, abstractproperty
 
 from lazy_property import LazyProperty
+from tqdm import tqdm
 
 
 class DataSet(ABC):
@@ -67,7 +69,26 @@ class DataSet(ABC):
         pass
 
     @LazyProperty
-    def pprint(self):
+    def as_dict(self):
         return {
             'name': self.name,
         }
+
+    def pprint(self):
+        """
+        Pretty prints your data set.
+
+        Parameters
+        ----------
+        data_set : DataSet
+            Instantiated data set.
+
+        """
+
+        tqdm.write('\n' * 3)
+        tqdm.write('=' * 100)
+        tqdm.write('\n' * 3)
+
+        tqdm.write('Data set:')
+        tqdm.write(json.dumps(self.as_dict, indent=4))
+        tqdm.write('\n' * 3)

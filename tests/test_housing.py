@@ -1,5 +1,5 @@
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score, mean_squared_error, max_error
+from sklearn.metrics import r2_score
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -30,9 +30,7 @@ def batches():
             random_state=__RANDOM_STATE
         ),
         metrics=[
-            r2_score,
-            mean_squared_error,
-            max_error
+            r2_score
         ]
     )
 
@@ -50,9 +48,7 @@ def batches():
             random_state=__RANDOM_STATE
         ),
         metrics=[
-            r2_score,
-            mean_squared_error,
-            max_error
+            r2_score
         ]
     )
 

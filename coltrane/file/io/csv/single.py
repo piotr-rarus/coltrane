@@ -12,30 +12,27 @@ class DataSet(base.DataSet):
     First column for the record ID.
     """
 
-    def __init__(self, path, encoder):
+    def __init__(self, path):
         """
         Initiates data set.
 
         Parameters
         ----------
         path : string
-            Path to your data set `.csv` file.
-        encoder : obj
-            Reference to encoder that should be used to encode labels.
-
+            Path to your data `csv` file.
         """
-        super().__init__(path, encoder)
+
+        super().__init__(path)
 
     @LazyWritableProperty
     def y(self):
         return self.__extract_y()
 
     def __extract_y(self):
-        y = self.__data_set.iloc[:, -1].values
-        return list([y.split(' ') for label in y])
+        return self.__data_set.iloc[:, -1].values
 
     @LazyProperty
-    def pprint(self):
-        base = super().pprint
+    def as_dict(self):
+        base = super().as_dict
         base['type'] = __name__,
         return base

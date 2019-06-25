@@ -166,4 +166,11 @@ def heatmap(
     figure = sns.heatmap(data, annot=True).get_figure()
 
     plt.title(plot_name)
+
+    if ylabel:
+        plt.ylabel(ylabel)
+
+    if xlabel:
+        plt.xlabel(xlabel)
+
     logger.save_fig(figure, plot_name)

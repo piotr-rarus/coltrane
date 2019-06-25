@@ -1,4 +1,3 @@
-import json
 import os
 from abc import ABC, abstractmethod
 from collections import OrderedDict
@@ -11,7 +10,6 @@ from tqdm import tqdm
 
 from .file.io.base import DataSet
 from .utility import plot
-
 
 init()
 
@@ -37,7 +35,7 @@ class Inspector(ABC):
         """
 
         for data_set in tqdm(data(), desc='Data'):
-            self.__pprint_data(data_set)
+            data_set.pprint()
 
             output = os.path.join(
                 output,
@@ -46,23 +44,12 @@ class Inspector(ABC):
             )
 
             with Logger(output) as logger:
-                logger.add_entry('data', data_set.pprint)
-
-                logger.add_entry(
-                    'attributes',
-                    {
-                        'count': len(data_set.attributes),
-                        'values': data_set.attributes
-                    }
-                )
-
+                logger.add_entry('data', data_set.as_dict)
                 self.__inspect(data_set, logger)
 
     def __inspect(self, data_set: DataSet, logger: Logger):
 
-        data = data_set.data
         X = data_set.X
-        # y = data_set.y
 
         summary = OrderedDict()
         X_count, attributes_count = X.shape
@@ -95,24 +82,6 @@ class Inspector(ABC):
 
         self.__post_inspect(data_set, logger)
 
-    def __pprint_data(self, data_set: DataSet):
-        """
-        Pretty prints your data set.
-
-        Parameters
-        ----------
-        data_set : DataSet
-            Instantiated data set.
-
-        """
-
-        tqdm.write('\n' * 3)
-        tqdm.write('=' * 100)
-        tqdm.write('\n' * 3)
-
-        tqdm.write('Data set:')
-        tqdm.write(json.dumps(data_set.pprint, indent=4))
-        tqdm.write('\n' * 3)
 
     @abstractmethod
     def __post_inspect(self, data_set: DataSet, logger: Logger):

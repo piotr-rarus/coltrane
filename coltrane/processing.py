@@ -1,62 +1,21 @@
 import json
 import os
 from abc import ABC, abstractmethod
-from collections import OrderedDict
-from dataclasses import dataclass
+from copy import deepcopy
 from datetime import datetime
 from timeit import default_timer as timer
 from typing import Generator, List
 
-import numpy as np
 from austen import Logger
 from colorama import init
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 
+from . import utility
 from .batch import Batch
 from .file.io.base import DataSet
-from .utility import aggregate, plot
 
 init()
-
-
-@dataclass(init=True)
-class SplitPerformance():
-    dt_fit: float
-    dt_predict: float
-    dt_predict_record: float
-
-    def to_dict(self):
-        return self.__dict__
-
-
-class Performance():
-
-    def __init__(self):
-        self.dt_fit = []
-        self.dt_predict = []
-        self.dt_predict_record = []
-
-    def append(self, split: SplitPerformance):
-        self.dt_fit.append(split.dt_fit)
-        self.dt_predict.append(split.dt_predict)
-        self.dt_predict_record.append(split.dt_predict_record)
-
-    def aggregate(self):
-        stats = OrderedDict()
-
-        for stat in self:
-            stats[stat.__name__] = self.__aggregate_stat(stat)
-
-        return stats
-
-    def __aggregate_stat(values: List[float]):
-        return {
-            'mean': np.mean(values),
-            'min': np.min(values),
-            'max': np.max(values),
-            'std': np.std(values)
-        }
 
 
 class Processor(ABC):
@@ -65,11 +24,11 @@ class Processor(ABC):
         return super().__init__()
 
     @abstractmethod
-    def __post_split(self, test_y, pred_y, labels, logger: Logger):
+    def __post_split(self, test_y, pred_y, logger: Logger, *args, **kwargs):
         pass
 
     @abstractmethod
-    def __post_batch():
+    def __post_batch(batch_stats: utility.batch.Stats, *args, **kwargs):
         pass
 
     def process(
@@ -78,35 +37,14 @@ class Processor(ABC):
         output: str
     ):
         for batch in tqdm(batches(), desc='Pipelines'):
-            self.__pprint_research(batch)
+            batch.pprint()
 
             logs_dir = self.__get_output(batch.data, output)
 
             with Logger(logs_dir) as logger:
 
                 logger.save_json(batch.pprint, 'batch')
-                self.__process_batch(batch, logger)
-
-    def __pprint_research(self, batch: Batch):
-        """
-        Pretty prints your data set and pipeline onto console using tqdm.
-
-        Parameters
-        ----------
-        data_set : DataSet
-            Instantiated data set.
-        pipeline : Pipeline
-            Configured pipeline template.
-
-        """
-
-        tqdm.write('\n' * 3)
-        tqdm.write('=' * 100)
-        tqdm.write('\n' * 3)
-
-        tqdm.write('Data set:')
-        tqdm.write(json.dumps(batch.pprint, indent=4))
-        tqdm.write('\n' * 3)
+                batch_stats = self.__process_batch(batch, logger)
 
     def __get_output(self, data_set: DataSet, output: str):
         now = datetime.now()
@@ -126,9 +64,7 @@ class Processor(ABC):
         splits = selection.split(data.X, data.y)
         splits_iter = enumerate(tqdm(splits, desc='Splits'))
 
-        stats = []
-
-        performance = Performance()
+        batch_stats = utility.batch.Stats()
 
         with logger.get_child('splits') as splits_logger:
             # TODO: generator doesn't have length attribute
@@ -137,7 +73,7 @@ class Processor(ABC):
             for split_index, (train_index, test_index) in splits_iter:
                 with splits_logger.get_child(str(split_index)) as split_logger:
 
-                    evaluation, split_performance = self.__process_split(
+                    split_stats = self.__process_split(
                         data,
                         pipeline,
                         metrics,
@@ -146,20 +82,23 @@ class Processor(ABC):
                         split_logger
                     )
 
-                    stats.append(evaluation)
-                    performance.append(split_performance)
+                    batch_stats.splits.append(split_stats)
 
-            grouped_stats = aggregate.group_metrics(stats)
+            logger.add_entry(
+                'summary',
+                batch_stats.get_aggregated_metrics()
+            )
 
-            aggregated_metrics = aggregate.stats(grouped_stats)
-            aggregated_performance = aggregate.performance(performance)
+            logger.add_entry(
+                'performance',
+                batch_stats.get_aggregated_performance()
+            )
 
-            logger.add_entry('summary', aggregated_metrics)
-            logger.add_entry('performance', aggregated_performance)
+            utility.plot.metrics(batch_stats.grouped_metrics, logger)
 
-            plot.metrics(grouped_stats, logger)
+            self.__post_batch(batch_stats)
 
-        self.__post_batch()
+        return batch_stats
 
     def __process_split(
         self,
@@ -169,7 +108,8 @@ class Processor(ABC):
         train_index: List[int],
         test_index: List[int],
         logger: Logger
-    ):
+    ) -> utility.split.Stats:
+
         train_X = data.X[train_index]
         train_y = data.y[train_index]
 
@@ -188,9 +128,13 @@ class Processor(ABC):
         dt_predict = end - start
         dt_predict_record = dt_predict / len(pred_y)
 
-        performance = SplitPerformance(dt_fit, dt_predict, dt_predict_record)
+        performance = utility.split.Performance(
+            dt_fit,
+            dt_predict,
+            dt_predict_record
+        )
 
-        evaluation = self.__evaluate_metrics(test_y, pred_y, metrics)
+        evaluation = utility.metric.evaluate(test_y, pred_y, metrics)
 
         logger.add_entry('metrics', evaluation)
         logger.add_entry('performance', performance.__dict__)
@@ -198,33 +142,8 @@ class Processor(ABC):
 
         self.__post_split(test_y, pred_y, set(data.y), logger)
 
-        return evaluation, performance
-
-    def __evaluate_metrics(self, test, pred, metrics):
-        stats = OrderedDict()
-
-        for metric in metrics:
-            name, value = self.__evaluate_metric(test, pred, metric)
-            stats[name] = value
-
-        return stats
-
-    def __evaluate_metric(self, test, pred, metric):
-        op, kwargs = None, None
-
-        if type(metric) is tuple and len(metric) == 2:
-            op, kwargs = metric
-
-        elif callable(metric):
-            op = metric
-            kwargs = {}
-
-        value = op(test, pred, **kwargs)
-
-        name = op.__name__
-
-        return name, value
-
-    def __update_performance(self, performance, telemetry):
-        for key, value in telemetry.items():
-            performance[key].append(value)
+        return utility.split.Stats(
+            deepcopy(pipeline),
+            metrics,
+            performance
+        )

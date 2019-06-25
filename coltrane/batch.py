@@ -1,8 +1,10 @@
+import json
 from collections import OrderedDict
 from typing import List, Tuple
 
 from lazy_property import LazyProperty
 from sklearn.pipeline import Pipeline
+from tqdm import tqdm
 
 from .file.io.base import DataSet
 
@@ -24,7 +26,7 @@ class Batch():
         self.metrics = metrics
 
     @LazyProperty
-    def pprint(self):
+    def as_dict(self):
         """
         Pipeline's config summary.
 
@@ -34,19 +36,40 @@ class Batch():
             Outputs nicely written pipeline configuration.
         """
 
-        config = {}
-        config['data'] = self.data.pprint
+        batch = OrderedDict()
+        batch['data'] = self.data.as_dict
 
-        config['selection'] = {
+        for step in self.pipeline:
+            batch['pipeline'][step.__class__.__name__] = vars(step)
+
+        batch['selection'] = {
             'cv': self.selection.__class__.__name__,
             'cvargs': self.selection.cvargs,
             'n_repeats': self.selection.n_repeats,
             'random_state': self.selection.random_state
         }
 
-        config['pipeline'] = {}
+        batch['pipeline'] = OrderedDict()
 
-        for step in self.pipeline:
-            config['pipeline'][step.__class__.__name__] = vars(step)
+        return batch
 
-        return config
+    def pprint(self):
+        """
+        Pretty prints your data set and pipeline onto console using tqdm.
+
+        Parameters
+        ----------
+        data_set : DataSet
+            Instantiated data set.
+        pipeline : Pipeline
+            Configured pipeline template.
+
+        """
+
+        tqdm.write('\n' * 3)
+        tqdm.write('=' * 100)
+        tqdm.write('\n' * 3)
+
+        tqdm.write('Data set:')
+        tqdm.write(json.dumps(self.as_dict, indent=4))
+        tqdm.write('\n' * 3)

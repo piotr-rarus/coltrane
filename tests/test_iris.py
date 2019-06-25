@@ -1,5 +1,9 @@
-from sklearn.metrics import (accuracy_score, f1_score, precision_score,
-                             recall_score)
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score
+)
 from sklearn.model_selection import RepeatedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
@@ -42,7 +46,7 @@ def metrics():
 def batches():
 
     yield Batch(
-        data=csv.single_label.DataSet(path=__DATA_IRIS),
+        data=csv.single.DataSet(path=__DATA_IRIS),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -58,7 +62,7 @@ def batches():
     )
 
     yield Batch(
-        data=csv.single_label.DataSet(path=__DATA_IRIS),
+        data=csv.single.DataSet(path=__DATA_IRIS),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -75,7 +79,7 @@ def batches():
 
 
 def data_set():
-    yield csv.single_label.DataSet(path=__DATA_IRIS)
+    yield csv.single.DataSet(path=__DATA_IRIS)
 
 
 def test_inspection():

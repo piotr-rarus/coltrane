@@ -60,8 +60,8 @@ class DataSet(base.DataSet):
         return self.__data_set.columns[1:-1].values
 
     @LazyProperty
-    def pprint(self):
-        base = super().pprint
+    def as_dict(self):
+        base = super().as_dict
         base['path'] = self.path
         return base
 
@@ -117,7 +117,7 @@ class DataSet(base.DataSet):
         self.__data_set.drop_duplicates(subset=columns, inplace=True)
 
         # ? This will drop duplicate records, that doesn't share class.
-        # ? I consider it to be contradictory knowledge.
+        # ? It's considered to be contradictory knowledge.
         self.__data_set.drop_duplicates(
             subset=self.attributes,
             keep=False,
