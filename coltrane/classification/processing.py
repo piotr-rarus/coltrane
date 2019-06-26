@@ -1,7 +1,9 @@
-from ..processing import Processor as BaseProcessor
-from sklearn.metrics import confusion_matrix as get_confusion_matrix
-from ..utility import batch, plot
 from austen import Logger
+from sklearn.metrics import confusion_matrix as get_confusion_matrix
+
+from ..processing import Processor as BaseProcessor
+from .. import utility
+from ..file.io.base import DataSet
 
 
 class Processor(BaseProcessor):
@@ -9,15 +11,27 @@ class Processor(BaseProcessor):
     def __init__(self):
         return super().__init__()
 
-    def __post_split(self, test_y, pred_y, logger: Logger, *args, **kwargs):
+    def __post_split(
+        self,
+        data_set: DataSet,
+        test_y,
+        pred_y,
+        logger: Logger,
+        *args,
+        **kwargs
+    ):
 
-        confusion_matrix = get_confusion_matrix(
-            test_y,
-            pred_y,
-            labels=kwargs.labels
-        )
+        confusion_matrix = get_confusion_matrix(test_y, pred_y)
 
-        plot.confusion_matrix(confusion_matrix, kwargs.labels, logger)
+        labels = list(dict.fromkeys(data_set.y).keys())
 
-    def __post_batch(batch_stats: batch.Stats, *args, **kwargs):
+        utility.plot.confusion_matrix(confusion_matrix, labels, logger)
+
+    def __post_batch(
+        self,
+        batch_stats: utility.batch.Stats,
+        logger: Logger,
+        *args,
+        **kwargs
+    ):
         pass

@@ -1,4 +1,3 @@
-import json
 import os
 from abc import ABC, abstractmethod
 from copy import deepcopy
@@ -24,11 +23,25 @@ class Processor(ABC):
         return super().__init__()
 
     @abstractmethod
-    def __post_split(self, test_y, pred_y, logger: Logger, *args, **kwargs):
+    def __post_split(
+        self,
+        data_set: DataSet,
+        test_y,
+        pred_y,
+        logger: Logger,
+        *args,
+        **kwargs
+    ):
         pass
 
     @abstractmethod
-    def __post_batch(batch_stats: utility.batch.Stats, *args, **kwargs):
+    def __post_batch(
+        self,
+        batch_stats: utility.batch.Stats,
+        logger: Logger,
+        *args,
+        **kwargs
+    ):
         pass
 
     def process(
@@ -43,7 +56,7 @@ class Processor(ABC):
 
             with Logger(logs_dir) as logger:
 
-                logger.save_json(batch.pprint, 'batch')
+                logger.save_json(batch.as_dict, 'batch')
                 batch_stats = self.__process_batch(batch, logger)
 
     def __get_output(self, data_set: DataSet, output: str):
@@ -56,12 +69,12 @@ class Processor(ABC):
         )
 
     def __process_batch(self, batch: Batch, logger: Logger):
-        data = batch.data
+        data_set = batch.data
         selection = batch.selection
         pipeline = batch.pipeline
         metrics = batch.metrics
 
-        splits = selection.split(data.X, data.y)
+        splits = selection.split(data_set.X, data_set.y)
         splits_iter = enumerate(tqdm(splits, desc='Splits'))
 
         batch_stats = utility.batch.Stats()
@@ -74,7 +87,7 @@ class Processor(ABC):
                 with splits_logger.get_child(str(split_index)) as split_logger:
 
                     split_stats = self.__process_split(
-                        data,
+                        data_set,
                         pipeline,
                         metrics,
                         train_index,
@@ -86,23 +99,23 @@ class Processor(ABC):
 
             logger.add_entry(
                 'summary',
-                batch_stats.get_aggregated_metrics()
+                batch_stats.aggregated_metrics
             )
 
             logger.add_entry(
                 'performance',
-                batch_stats.get_aggregated_performance()
+                batch_stats.aggregated_performance
             )
 
             utility.plot.metrics(batch_stats.grouped_metrics, logger)
 
-            self.__post_batch(batch_stats)
+            self.__post_batch(batch_stats, logger)
 
         return batch_stats
 
     def __process_split(
         self,
-        data: DataSet,
+        data_set: DataSet,
         pipeline: Pipeline,
         metrics,
         train_index: List[int],
@@ -110,11 +123,11 @@ class Processor(ABC):
         logger: Logger
     ) -> utility.split.Stats:
 
-        train_X = data.X[train_index]
-        train_y = data.y[train_index]
+        train_X = data_set.X[train_index]
+        train_y = data_set.y[train_index]
 
-        test_X = data.X[test_index]
-        test_y = data.y[test_index]
+        test_X = data_set.X[test_index]
+        test_y = data_set.y[test_index]
 
         # TODO: this looks ugly, maybe some wrapper?
         start = timer()
@@ -140,10 +153,10 @@ class Processor(ABC):
         logger.add_entry('performance', performance.__dict__)
         logger.save_obj(pipeline, 'pipeline')
 
-        self.__post_split(test_y, pred_y, set(data.y), logger)
+        self.__post_split(data_set, test_y, pred_y, logger)
 
         return utility.split.Stats(
             deepcopy(pipeline),
-            metrics,
+            evaluation,
             performance
         )

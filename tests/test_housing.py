@@ -17,7 +17,7 @@ __RANDOM_STATE = 45625461
 def batches():
 
     yield Batch(
-        data=csv.single_label.DataSet(path=__DATA_HOUSING),
+        data=csv.single.DataSet(path=__DATA_HOUSING),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -35,7 +35,7 @@ def batches():
     )
 
     yield Batch(
-        data=csv.single_label.DataSet(path=__DATA_HOUSING),
+        data=csv.single.DataSet(path=__DATA_HOUSING),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -54,7 +54,7 @@ def batches():
 
 
 def data_set():
-    yield csv.single_label.DataSet(path=__DATA_HOUSING)
+    yield csv.single.DataSet(path=__DATA_HOUSING)
 
 
 def test_inspection():

@@ -1,17 +1,17 @@
 from collections import OrderedDict
 
 
-def evaluate(self, test, pred, metrics):
+def evaluate(test, pred, metrics):
     stats = OrderedDict()
 
     for metric in metrics:
-        name, value = self.__evaluate(test, pred, metric)
+        name, value = __evaluate(test, pred, metric)
         stats[name] = value
 
     return stats
 
 
-def __evaluate(self, test, pred, metric):
+def __evaluate(test, pred, metric):
     op, kwargs = None, None
 
     if type(metric) is tuple and len(metric) == 2:

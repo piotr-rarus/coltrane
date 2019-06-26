@@ -15,7 +15,11 @@ class Stats():
     def __init__(self):
         self.splits = []
 
-    def get_aggregated_performance(self):
+    @property
+    def aggregated_performance(self):
+
+        if not self.splits:
+            return {}
 
         performances = [split.performance for split in self.splits]
 
@@ -39,16 +43,21 @@ class Stats():
 
         aggregated = OrderedDict()
 
-        aggregated[dt_fit.__name__] = self.__aggregate_stat(dt_fit)
-        aggregated[dt_predict.__name__] = self.__aggregate_stat(dt_predict)
+        aggregated['dt_fit'] = self.__aggregate_stat(dt_fit)
+        aggregated['dt_predict'] = self.__aggregate_stat(dt_predict)
 
-        aggregated[dt_predict_record.__name__] = self.__aggregate_stat(
+        aggregated['dt_predict_record'] = self.__aggregate_stat(
             dt_predict_record
         )
 
         return aggregated
 
-    def get_aggregated_metrics(self):
+    @property
+    def aggregated_metrics(self):
+
+        if not self.splits:
+            return {}
+
         aggregated = OrderedDict()
 
         for metric, values in self.grouped_metrics.items():
@@ -63,8 +72,8 @@ class Stats():
 
         return aggregated
 
-    @LazyProperty
-    def grouped_metrics(self, metrics):
+    @property
+    def grouped_metrics(self):
         """
         Groups evaluation metric values from each split, by metrics.
 
@@ -80,6 +89,10 @@ class Stats():
         dict
             Grouped evaluation measures.
         """
+
+        if not self.splits:
+            return {}
+
         metrics = [split.metrics for split in self.splits]
 
         grouped = {}

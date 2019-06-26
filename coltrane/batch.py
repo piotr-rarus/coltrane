@@ -39,6 +39,8 @@ class Batch():
         batch = OrderedDict()
         batch['data'] = self.data.as_dict
 
+        batch['pipeline'] = OrderedDict()
+
         for step in self.pipeline:
             batch['pipeline'][step.__class__.__name__] = vars(step)
 
@@ -48,8 +50,6 @@ class Batch():
             'n_repeats': self.selection.n_repeats,
             'random_state': self.selection.random_state
         }
-
-        batch['pipeline'] = OrderedDict()
 
         return batch
 
