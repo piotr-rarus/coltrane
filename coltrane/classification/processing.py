@@ -21,10 +21,11 @@ class Processor(BaseProcessor):
         **kwargs
     ):
 
-        confusion_matrix = get_confusion_matrix(test_y, pred_y)
-
         labels = list(dict.fromkeys(data_set.y).keys())
+        self.__plot_confusion_matrix(test_y, pred_y, labels, logger)
 
+    def __plot_confusion_matrix(self, test_y, pred_y, labels, logger: Logger):
+        confusion_matrix = get_confusion_matrix(test_y, pred_y)
         utility.plot.confusion_matrix(confusion_matrix, labels, logger)
 
     def __post_batch(

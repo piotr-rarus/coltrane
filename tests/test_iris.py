@@ -2,7 +2,8 @@ from sklearn.metrics import (
     accuracy_score,
     f1_score,
     precision_score,
-    recall_score
+    recall_score,
+    matthews_corrcoef
 )
 from sklearn.model_selection import RepeatedKFold
 from sklearn.naive_bayes import GaussianNB
@@ -25,19 +26,25 @@ def metrics():
             (
                 precision_score,
                 {
-                    'average': 'macro'
+                    'average': 'micro'
                 }
             ),
             (
                 recall_score,
                 {
-                    'average': 'macro'
+                    'average': 'micro'
                 }
             ),
             (
                 f1_score,
                 {
-                    'average': 'macro'
+                    'average': 'micro'
+                }
+            ),
+            (
+                matthews_corrcoef,
+                {
+
                 }
             )
         ]
