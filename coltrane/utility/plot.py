@@ -92,7 +92,6 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     logger.save_fig(figure, plot_name)
 
 
-@__disposable_plot
 def metrics(metrics, logger: Logger):
     """
     Plots and dumps aggregated metrics.
@@ -105,16 +104,24 @@ def metrics(metrics, logger: Logger):
         Logger instance used to dump a plot.
     """
 
-    data_frame = pd.DataFrame()
+    normalized = pd.DataFrame()
+    other = pd.DataFrame()
 
     for metric, values in metrics.items():
-        data_frame[metric] = values
+        if np.max(values) <= 1.0:
+            normalized[metric] = values
+        else:
+            other[metric] = values
 
-    figure = sns.boxenplot(data=data_frame).figure
+    __metrics(normalized, logger, 'metrics-normalized')
+    __metrics(other, logger, 'metrics-other')
 
-    plt.title('Metrics')
 
-    logger.save_fig(figure, 'metrics')
+@__disposable_plot
+def __metrics(metrics: pd.DataFrame, logger: Logger, plot_name: str):
+    figure = sns.boxenplot(data=metrics).figure
+    plt.title(plot_name)
+    logger.save_fig(figure, plot_name)
 
 
 def confusion_matrix(

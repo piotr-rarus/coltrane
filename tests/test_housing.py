@@ -1,5 +1,5 @@
+import sklearn.metrics
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -12,6 +12,19 @@ __LOGS = 'logs'
 __DATA_HOUSING = 'tests\\data\\housing.csv'
 
 __RANDOM_STATE = 45625461
+
+
+def get_metrics():
+    return [
+        (
+            sklearn.metrics.explained_variance_score,
+            {
+                'multioutput': 'variance_weighted'
+            }
+        ),
+        sklearn.metrics.r2_score,
+        sklearn.metrics.mean_squared_error
+    ]
 
 
 def batches():
@@ -29,9 +42,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        metrics=[
-            r2_score
-        ]
+        metrics=get_metrics()
     )
 
     yield Batch(
@@ -47,9 +58,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        metrics=[
-            r2_score
-        ]
+        metrics=get_metrics()
     )
 
 

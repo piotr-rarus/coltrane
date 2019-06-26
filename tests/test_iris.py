@@ -20,7 +20,7 @@ __DATA_IRIS = 'tests\\data\\iris.csv'
 __RANDOM_STATE = 45625461
 
 
-def metrics():
+def get_metrics():
     return [
             accuracy_score,
             (
@@ -65,7 +65,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        metrics=metrics()
+        metrics=get_metrics()
     )
 
     yield Batch(
@@ -81,7 +81,7 @@ def batches():
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        metrics=metrics()
+        metrics=get_metrics()
     )
 
 
