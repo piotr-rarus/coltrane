@@ -24,16 +24,14 @@ setuptools.setup(
         'scipy',
         'pandas',
         'scikit-learn',
-        'scikit-multilearn',
-        'imbalanced-learn',
         'matplotlib'
         'seaborn',
-        'joblib',
         'tqdm',
         'pytest',
         'pytest_cov',
         'lazy_property',
         'colorama',
+        'austen'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
