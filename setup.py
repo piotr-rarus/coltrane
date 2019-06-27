@@ -22,14 +22,14 @@ setuptools.setup(
     install_requires=[
         'numpy',
         'scipy',
-        'pandas',        
+        'pandas',
         'scikit-learn',
         'scikit-multilearn',
         'imbalanced-learn',
         'matplotlib'
         'seaborn',
         'joblib',
-        'tqdm',        
+        'tqdm',
         'pytest',
         'pytest_cov',
         'lazy_property',
@@ -37,7 +37,7 @@ setuptools.setup(
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
-        'License :: MIT',
+        'License :: OSI Approved :: MIT License',
         'Operating System :: OS Independent'
     ]
 )
