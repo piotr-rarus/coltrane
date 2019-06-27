@@ -1,5 +1,6 @@
 import json
 from abc import ABC, abstractmethod, abstractproperty
+from pathlib import Path
 
 from lazy_property import LazyProperty
 from tqdm import tqdm
@@ -17,13 +18,13 @@ class DataSet(ABC):
 
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: Path):
         """
         Base abstract class for data sets.
 
         Parameters
         ----------
-        path : str
+        path : Path
             Path to your data set. Be it exact file, folder, doesn't matter,
             loading will be handled by specific `DataSet` implementation.
         """

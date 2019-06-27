@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from lazy_property import LazyProperty, LazyWritableProperty
 
 from . import base
@@ -12,13 +14,13 @@ class DataSet(base.DataSet):
     First column for the record ID.
     """
 
-    def __init__(self, path):
+    def __init__(self, path: Path):
         """
         Initiates data set.
 
         Parameters
         ----------
-        path : string
+        path : Path
             Path to your data `csv` file.
         """
 

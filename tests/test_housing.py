@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import sklearn.metrics
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import RepeatedKFold
@@ -9,7 +11,7 @@ from coltrane import Batch, file
 from coltrane.regression import Inspector, Processor
 
 __LOGS = 'logs'
-__DATA_HOUSING = '.\\tests\\data\\housing.csv'
+__DATA_HOUSING = Path('tests/data/housing.csv')
 
 __RANDOM_STATE = 45625461
 

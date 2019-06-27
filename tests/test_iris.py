@@ -10,12 +10,13 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+from pathlib import Path
 
 from coltrane import Batch, file
 from coltrane.classification import Inspector, Processor
 
 __LOGS = 'logs'
-__DATA_IRIS = '.\\tests\\data\\iris.csv'
+__DATA_IRIS = Path('tests/data/iris.csv')
 
 __RANDOM_STATE = 45625461
 

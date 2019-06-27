@@ -1,5 +1,5 @@
-import os.path
 from abc import abstractproperty, abstractmethod
+from pathlib import Path
 
 import pandas as pd
 from lazy_property import LazyProperty, LazyWritableProperty
@@ -16,13 +16,13 @@ class DataSet(base.DataSet):
     First column for the record ID.
     """
 
-    def __init__(self, path):
+    def __init__(self, path: Path):
         """
         Base abstract class for `csv` based data.
 
         Parameters
         ----------
-        path : string
+        path : Path
             Path to your data `csv` file.
         """
 
@@ -38,7 +38,7 @@ class DataSet(base.DataSet):
 
     @LazyProperty
     def name(self):
-        return os.path.splitext(os.path.basename(self.path))[0]
+        return self.path.stem
 
     @LazyWritableProperty
     def X(self):
@@ -62,7 +62,7 @@ class DataSet(base.DataSet):
     @LazyProperty
     def as_dict(self):
         base = super().as_dict
-        base['path'] = self.path
+        base['path'] = self.path.name
         return base
 
     def isna(self):

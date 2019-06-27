@@ -46,7 +46,7 @@ jobs:
           name: Coverage
           command: |
             . env/bin/activate
-            python -m pytest --cov=coltrane ./tests/
+            python -m pytest ./tests/ --cov=coltrane
 
       - store_test_results:
           path: test-reports
