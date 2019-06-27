@@ -82,7 +82,6 @@ class Inspector(ABC):
 
         self.__post_inspect(data_set, logger)
 
-
     @abstractmethod
     def __post_inspect(self, data_set: DataSet, logger: Logger):
         pass

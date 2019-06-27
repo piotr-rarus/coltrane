@@ -57,7 +57,7 @@ class Processor(ABC):
             with Logger(logs_dir) as logger:
 
                 logger.save_json(batch.as_dict, 'batch')
-                batch_stats = self.__process_batch(batch, logger)
+                self.__process_batch(batch, logger)
 
     def __get_output(self, data_set: DataSet, output: str):
         now = datetime.now()

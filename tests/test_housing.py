@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 
-from coltrane import Batch, csv
+from coltrane import Batch, file
 from coltrane.regression import Inspector, Processor
 
 __LOGS = 'logs'
@@ -30,7 +30,7 @@ def get_metrics():
 def batches():
 
     yield Batch(
-        data=csv.single.DataSet(path=__DATA_HOUSING),
+        data=file.io.csv.single.DataSet(path=__DATA_HOUSING),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -46,7 +46,7 @@ def batches():
     )
 
     yield Batch(
-        data=csv.single.DataSet(path=__DATA_HOUSING),
+        data=file.io.csv.single.DataSet(path=__DATA_HOUSING),
         pipeline=Pipeline(
             steps=[
                 ('standard-scaler', StandardScaler()),
@@ -63,7 +63,7 @@ def batches():
 
 
 def data_set():
-    yield csv.single.DataSet(path=__DATA_HOUSING)
+    yield file.io.csv.single.DataSet(path=__DATA_HOUSING)
 
 
 def test_inspection():

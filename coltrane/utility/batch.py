@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import List
 
 import numpy as np
-from lazy_property import LazyProperty
 
 from . import split
 
