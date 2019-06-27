@@ -9,7 +9,7 @@ from coltrane import Batch, file
 from coltrane.regression import Inspector, Processor
 
 __LOGS = 'logs'
-__DATA_HOUSING = 'tests\\data\\housing.csv'
+__DATA_HOUSING = '.\\tests\\data\\housing.csv'
 
 __RANDOM_STATE = 45625461
 
