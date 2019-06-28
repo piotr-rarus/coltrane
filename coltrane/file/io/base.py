@@ -69,7 +69,6 @@ class DataSet(ABC):
     def drop_duplicates(self):
         pass
 
-    @LazyProperty
     def as_dict(self):
         return {
             'name': self.name,
@@ -91,5 +90,5 @@ class DataSet(ABC):
         tqdm.write('\n' * 3)
 
         tqdm.write('Data set:')
-        tqdm.write(json.dumps(self.as_dict, indent=4))
+        tqdm.write(json.dumps(self.as_dict(), indent=4))
         tqdm.write('\n' * 3)

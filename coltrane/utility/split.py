@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from lazy_property import LazyProperty
 from sklearn.pipeline import Pipeline
 
 
@@ -9,7 +10,7 @@ class Performance():
     dt_predict: float
     dt_predict_record: float
 
-    def to_dict(self):
+    def as_dict(self):
         return self.__dict__
 
 

@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from austen import Logger
 
 from ..file.io.base import DataSet
@@ -17,7 +15,7 @@ class Inspector(Base):
         records = data_set.X
         labels = data_set.y
 
-        summary = OrderedDict()
+        summary = {}
         summary['balance'] = aggregate.balance(labels)
         plot.labels_distribution(labels, logger, 'balance')
 

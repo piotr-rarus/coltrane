@@ -1,6 +1,5 @@
 import os
 from abc import ABC, abstractmethod
-from collections import OrderedDict
 from typing import Generator
 
 import numpy as np
@@ -44,23 +43,23 @@ class Inspector(ABC):
             )
 
             with Logger(output) as logger:
-                logger.add_entry('data', data_set.as_dict)
+                logger.add_entry('data', data_set.as_dict())
                 self.__inspect(data_set, logger)
 
     def __inspect(self, data_set: DataSet, logger: Logger):
 
         X = data_set.X
 
-        summary = OrderedDict()
+        summary = {}
         X_count, attributes_count = X.shape
 
-        summary['records'] = OrderedDict()
+        summary['records'] = {}
         summary['records']['count'] = X_count
 
         missing_values = np.count_nonzero(data_set.isna())
         summary['records']['missing-values'] = missing_values
 
-        summary['attributes'] = OrderedDict()
+        summary['attributes'] = {}
         summary['attributes']['count'] = attributes_count
 
         categorical_attributes = self.__get_categorical_attributes(data_set)

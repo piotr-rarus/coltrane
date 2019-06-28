@@ -1,10 +1,7 @@
-from collections import OrderedDict
 from dataclasses import dataclass
 from typing import List
 
-import numpy as np
-
-from . import split
+from . import aggregate, split
 
 
 @dataclass()
@@ -40,14 +37,13 @@ class Stats():
             in performances
         ]
 
-        aggregated = OrderedDict()
+        aggregated = {}
 
-        aggregated['dt_fit'] = self.__aggregate_stat(dt_fit)
-        aggregated['dt_predict'] = self.__aggregate_stat(dt_predict)
-
-        aggregated['dt_predict_record'] = self.__aggregate_stat(
+        aggregated['dt_fit'] = aggregate.Stats(dt_fit).as_dict()
+        aggregated['dt_predict'] = aggregate.Stats(dt_predict).as_dict()
+        aggregated['dt_predict_record'] = aggregate.Stats(
             dt_predict_record
-        )
+        ).as_dict()
 
         return aggregated
 
@@ -57,17 +53,10 @@ class Stats():
         if not self.splits:
             return {}
 
-        aggregated = OrderedDict()
+        aggregated = {}
 
         for metric, values in self.grouped_metrics.items():
-            stats = OrderedDict()
-
-            stats['mean'] = np.mean(values)
-            stats['min'] = np.min(values)
-            stats['max'] = np.max(values)
-            stats['std'] = np.std(values)
-
-            aggregated[metric] = stats
+            aggregated[metric] = aggregate.Stats(values).as_dict()
 
         return aggregated
 
@@ -105,11 +94,3 @@ class Stats():
                 grouped[metric].append(value)
 
         return grouped
-
-    def __aggregate_stat(self, values: List[float]):
-        return {
-            'mean': np.mean(values),
-            'min': np.min(values),
-            'max': np.max(values),
-            'std': np.std(values)
-        }

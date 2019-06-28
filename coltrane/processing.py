@@ -56,7 +56,7 @@ class Processor(ABC):
 
             with Logger(logs_dir) as logger:
 
-                logger.save_json(batch.as_dict, 'batch')
+                logger.save_json(batch.as_dict(), 'batch')
                 self.__process_batch(batch, logger)
 
     def __get_output(self, data_set: DataSet, output: str):
@@ -150,7 +150,7 @@ class Processor(ABC):
         evaluation = utility.metric.evaluate(test_y, pred_y, metrics)
 
         logger.add_entry('metrics', evaluation)
-        logger.add_entry('performance', performance.__dict__)
+        logger.add_entry('performance', performance.as_dict())
         logger.save_obj(pipeline, 'pipeline')
 
         self.__post_split(data_set, test_y, pred_y, logger)

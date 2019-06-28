@@ -1,5 +1,8 @@
+from dataclasses import dataclass
+from typing import List
+
 import numpy as np
-from collections import OrderedDict
+from lazy_property import LazyProperty
 
 
 """
@@ -8,96 +11,21 @@ Utility functions for model evaluation stats/performance aggregation.
 """
 
 
-def stats(stats):
-    """
-    Aggregates each measure of model's evaluation.
-    Computes `percentiles` and `std` for each of them.
+@dataclass
+class Stats():
+    mean: float
+    min: float
+    max: float
+    std: float
 
-    Parameters
-    ----------
-    stats : list[dict]
-        List of evaluation stats from each `train/test` split.
-        Please follow the structure denoted
-        by sklearn.metrics.classification_report.
+    def __init__(self, values: List[float]):
+        self.mean = np.mean(values)
+        self.min = np.min(values)
+        self.max = np.max(values)
+        self.std = np.std(values)
 
-    Returns
-    -------
-    dict
-        Aggregated stats.
-    """
-
-    summary = OrderedDict()
-
-    for metric, values in stats.items():
-        stats = OrderedDict()
-
-        stats['mean'] = np.mean(values)
-        stats['min'] = np.min(values)
-        stats['max'] = np.max(values)
-        stats['std'] = np.std(values)
-
-        summary[metric] = stats
-
-    return summary
-
-
-def group_metrics(stats):
-    """
-    Groups evaluation metric values from each split, by metrics.
-
-    Parameters
-    ----------
-    stats : list[dict]
-        List of evaluation stats from each `train/test` split.
-        Please follow the structure denoted
-        by sklearn.metrics.classification_report.
-
-    Returns
-    -------
-    dict
-        Grouped evaluation measures.
-    """
-
-    grouped = {}
-
-    for stat in stats:
-        for metric, value in stat.items():
-
-            if metric not in grouped:
-                grouped[metric] = []
-
-            grouped[metric].append(value)
-
-    return grouped
-
-
-def performance(performance):
-    """
-    Aggregates performance stats from each `train/test` split.
-    Calculates `percentiles` and `std`.
-
-    Parameters
-    ----------
-    performance : dict
-        Key - label
-        Value - performance measurements
-
-    Returns
-    -------
-    dict
-        Aggregated performance stats.
-    """
-
-    summary = OrderedDict()
-
-    for label, values in vars(performance).items():
-        summary[label] = OrderedDict()
-        summary[label]['mean'] = np.mean(values)
-        summary[label]['min'] = np.min(values)
-        summary[label]['max'] = np.max(values)
-        summary[label]['std'] = np.std(values)
-
-    return summary
+    def as_dict(self):
+        return self.__dict__
 
 
 def balance(labels):
@@ -123,10 +51,7 @@ def balance(labels):
 
     counts = aggregate[1]
 
-    summary['stats'] = {
-        'std': np.std(counts),
-        'percentiles': np.percentile(counts, [0, 25, 50, 75, 100])
-    }
+    summary['stats'] = Stats(counts).as_dict()
 
     return summary
 

@@ -1,16 +1,12 @@
-from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    precision_score,
-    recall_score,
-    matthews_corrcoef
-)
+from pathlib import Path
+
+from sklearn.metrics import (accuracy_score, f1_score, precision_score,
+                             recall_score)
 from sklearn.model_selection import RepeatedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
-from pathlib import Path
 
 from coltrane import Batch, file
 from coltrane.classification import Inspector, Processor
@@ -27,25 +23,19 @@ def get_metrics():
             (
                 precision_score,
                 {
-                    'average': 'micro'
+                    'average': 'macro'
                 }
             ),
             (
                 recall_score,
                 {
-                    'average': 'micro'
+                    'average': 'macro'
                 }
             ),
             (
                 f1_score,
                 {
-                    'average': 'micro'
-                }
-            ),
-            (
-                matthews_corrcoef,
-                {
-
+                    'average': 'macro'
                 }
             )
         ]

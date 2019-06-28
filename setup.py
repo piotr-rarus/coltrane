@@ -10,7 +10,7 @@ setuptools.setup(
     version='0.1.0',
     author='Piotr Rarus',
     author_email='piotr.rarus@gmail.com',
-    description='ML framework to ease research process. Built on top of scikit-learn.',
+    description='Just another ML framework. Built on top of scikit-learn.',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/piotr-rarus/coltrane',
