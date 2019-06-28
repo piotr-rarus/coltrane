@@ -33,8 +33,7 @@ class DataSet(base.DataSet):
     def __extract_y(self):
         return self.__data_set.iloc[:, -1].values
 
-    @LazyProperty
     def as_dict(self):
-        base = super().as_dict
+        base = super().as_dict()
         base['type'] = __name__,
         return base

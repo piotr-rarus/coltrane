@@ -24,7 +24,6 @@ class Batch():
         self.pipeline = pipeline
         self.metrics = metrics
 
-    @LazyProperty
     def as_dict(self):
         """
         Pipeline's config summary.
@@ -36,7 +35,7 @@ class Batch():
         """
 
         batch = {}
-        batch['data'] = self.data.as_dict
+        batch['data'] = self.data.as_dict()
 
         batch['pipeline'] = {}
 
@@ -70,5 +69,5 @@ class Batch():
         tqdm.write('\n' * 3)
 
         tqdm.write('Data set:')
-        tqdm.write(json.dumps(self.as_dict, indent=4))
+        tqdm.write(json.dumps(self.as_dict(), indent=4))
         tqdm.write('\n' * 3)

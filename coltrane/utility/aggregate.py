@@ -1,10 +1,31 @@
+from dataclasses import dataclass
+from typing import List
+
 import numpy as np
+from lazy_property import LazyProperty
 
 
 """
 Utility functions for model evaluation stats/performance aggregation.
 
 """
+
+
+@dataclass
+class Stats():
+    mean: float
+    min: float
+    max: float
+    std: float
+
+    def __init__(self, values: List[float]):
+        self.mean = np.mean(values)
+        self.min = np.min(values)
+        self.max = np.max(values)
+        self.std = np.std(values)
+
+    def as_dict(self):
+        return self.__dict__
 
 
 def balance(labels):
@@ -30,11 +51,7 @@ def balance(labels):
 
     counts = aggregate[1]
 
-    summary['stats'] = {
-        'std': np.std(counts),
-        # ! TODO move to class
-        'percentiles': np.percentile(counts, [0, 25, 50, 75, 100])
-    }
+    summary['stats'] = Stats(counts).as_dict()
 
     return summary
 

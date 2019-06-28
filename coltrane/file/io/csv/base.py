@@ -59,9 +59,8 @@ class DataSet(base.DataSet):
     def attributes(self):
         return self.__data_set.columns[1:-1].values
 
-    @LazyProperty
     def as_dict(self):
-        base = super().as_dict
+        base = super().as_dict()
         base['path'] = self.path.name
         return base
 

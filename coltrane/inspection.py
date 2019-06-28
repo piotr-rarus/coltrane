@@ -43,7 +43,7 @@ class Inspector(ABC):
             )
 
             with Logger(output) as logger:
-                logger.add_entry('data', data_set.as_dict)
+                logger.add_entry('data', data_set.as_dict())
                 self.__inspect(data_set, logger)
 
     def __inspect(self, data_set: DataSet, logger: Logger):
