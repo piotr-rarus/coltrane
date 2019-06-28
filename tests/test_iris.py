@@ -27,19 +27,19 @@ def get_metrics():
             (
                 precision_score,
                 {
-                    'average': 'micro'
+                    'average': 'macro'
                 }
             ),
             (
                 recall_score,
                 {
-                    'average': 'micro'
+                    'average': 'macro'
                 }
             ),
             (
                 f1_score,
                 {
-                    'average': 'micro'
+                    'average': 'macro'
                 }
             ),
             (
