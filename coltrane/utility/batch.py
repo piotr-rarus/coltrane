@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from dataclasses import dataclass
 from typing import List
 
@@ -40,7 +39,7 @@ class Stats():
             in performances
         ]
 
-        aggregated = OrderedDict()
+        aggregated = {}
 
         aggregated['dt_fit'] = self.__aggregate_stat(dt_fit)
         aggregated['dt_predict'] = self.__aggregate_stat(dt_predict)
@@ -57,10 +56,10 @@ class Stats():
         if not self.splits:
             return {}
 
-        aggregated = OrderedDict()
+        aggregated = {}
 
         for metric, values in self.grouped_metrics.items():
-            stats = OrderedDict()
+            stats = {}
 
             stats['mean'] = np.mean(values)
             stats['min'] = np.min(values)

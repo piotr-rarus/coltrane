@@ -1,5 +1,4 @@
 import json
-from collections import OrderedDict
 from typing import List, Tuple
 
 from lazy_property import LazyProperty
@@ -36,10 +35,10 @@ class Batch():
             Outputs nicely written pipeline configuration.
         """
 
-        batch = OrderedDict()
+        batch = {}
         batch['data'] = self.data.as_dict
 
-        batch['pipeline'] = OrderedDict()
+        batch['pipeline'] = {}
 
         for step in self.pipeline:
             batch['pipeline'][step.__class__.__name__] = vars(step)

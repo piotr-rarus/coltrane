@@ -1,8 +1,5 @@
-from collections import OrderedDict
-
-
 def evaluate(test, pred, metrics):
-    stats = OrderedDict()
+    stats = {}
 
     for metric in metrics:
         name, value = __evaluate(test, pred, metric)

@@ -1,5 +1,4 @@
 import numpy as np
-from collections import OrderedDict
 
 
 """
@@ -26,10 +25,10 @@ def stats(stats):
         Aggregated stats.
     """
 
-    summary = OrderedDict()
+    summary = {}
 
     for metric, values in stats.items():
-        stats = OrderedDict()
+        stats = {}
 
         stats['mean'] = np.mean(values)
         stats['min'] = np.min(values)
@@ -88,10 +87,10 @@ def performance(performance):
         Aggregated performance stats.
     """
 
-    summary = OrderedDict()
+    summary = {}
 
     for label, values in vars(performance).items():
-        summary[label] = OrderedDict()
+        summary[label] = {}
         summary[label]['mean'] = np.mean(values)
         summary[label]['min'] = np.min(values)
         summary[label]['max'] = np.max(values)
