@@ -1,7 +1,6 @@
 import json
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
-from lazy_property import LazyProperty
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 
@@ -13,15 +12,15 @@ class Batch():
     def __init__(
         self,
         *,
-        data: DataSet,
-        pipeline: Pipeline,
+        data_set: DataSet,
+        pipelines: Generator[Pipeline, None, None],
         selection,
         metrics: List[Tuple]
     ):
 
-        self.data = data
+        self.data_set = data_set
         self.selection = selection
-        self.pipeline = pipeline
+        self.pipelines = pipelines
         self.metrics = metrics
 
     def as_dict(self):
@@ -35,12 +34,7 @@ class Batch():
         """
 
         batch = {}
-        batch['data'] = self.data.as_dict()
-
-        batch['pipeline'] = {}
-
-        for step in self.pipeline:
-            batch['pipeline'][step.__class__.__name__] = vars(step)
+        batch['data_set'] = self.data_set.as_dict()
 
         batch['selection'] = {
             'cv': self.selection.__class__.__name__,
@@ -48,6 +42,17 @@ class Batch():
             'n_repeats': self.selection.n_repeats,
             'random_state': self.selection.random_state
         }
+
+        metrics = {}
+
+        for metric in self.metrics:
+            if type(metric) is tuple:
+                op, kwargs = metric
+                metrics[op.__name__] = kwargs
+            else:
+                metrics[metric.__name__] = {}
+
+        batch['metrics'] = metrics
 
         return batch
 

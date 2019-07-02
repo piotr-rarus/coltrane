@@ -1,7 +1,4 @@
-import os
 from abc import ABC, abstractmethod
-from copy import deepcopy
-from datetime import datetime
 from timeit import default_timer as timer
 from typing import Generator, List
 
@@ -9,10 +6,12 @@ from austen import Logger
 from colorama import init
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
+from pathlib import Path
 
 from . import utility
 from .batch import Batch
 from .file.io.base import DataSet
+
 
 init()
 
@@ -35,49 +34,84 @@ class Processor(ABC):
         pass
 
     @abstractmethod
-    def __post_batch(
+    def __post_pipeline(
         self,
-        batch_stats: utility.batch.Stats,
+        stats: utility.pipeline.Stats,
         logger: Logger,
         *args,
         **kwargs
     ):
         pass
 
+    # @abstractmethod
+    # def __post_batch(
+    #     self,
+    #     batch_stats: utility.batch.Stats,
+    #     logger: Logger,
+    #     *args,
+    #     **kwargs
+    # ):
+    #     pass
+
     def process(
         self,
         batches: Generator[Batch, None, None],
-        output: str
+        output: Path
     ):
-        for batch in tqdm(batches(), desc='Pipelines'):
+
+        for batch in tqdm(batches(), desc='Batches'):
             batch.pprint()
 
-            logs_dir = self.__get_output(batch.data, output)
+            batch_dir = Path(output, batch.data_set.name)
+            with Logger(batch_dir) as batch_logger:
+                self.__process_batch(batch, batch_dir, batch_logger)
 
-            with Logger(logs_dir) as logger:
+    def __process_batch(
+        self,
+        batch: Batch,
+        batch_dir: Path,
+        logger: Logger
+    ):
+        for pipeline in tqdm(batch.pipelines(), desc='Pipelines'):
 
-                logger.save_json(batch.as_dict(), 'batch')
-                self.__process_batch(batch, logger)
+            pipeline_hash = str(hash(pipeline))
+            pipeline_dir = batch_dir.joinpath(pipeline_hash)
 
-    def __get_output(self, data_set: DataSet, output: str):
-        now = datetime.now()
+            with Logger(pipeline_dir) as pipeline_logger:
 
-        return os.path.join(
-            output,
-            data_set.name,
-            str(now.timestamp())
-        )
+                batch_as_dict = batch.as_dict()
 
-    def __process_batch(self, batch: Batch, logger: Logger):
-        data_set = batch.data
-        selection = batch.selection
-        pipeline = batch.pipeline
-        metrics = batch.metrics
+                batch_as_dict['pipeline'] = self.__pipeline_as_dict(pipeline)
+                pipeline_logger.save_json(batch_as_dict, 'batch')
 
+                self.__process_pipeline(
+                    batch.data_set,
+                    batch.selection,
+                    pipeline,
+                    batch.metrics,
+                    pipeline_logger
+                )
+
+    def __pipeline_as_dict(self, pipeline: Pipeline):
+        as_dict = {}
+
+        for step in pipeline:
+            as_dict[step.__class__.__name__] = vars(step)
+
+        return as_dict
+
+    def __process_pipeline(
+        self,
+        data_set: DataSet,
+        selection,
+        pipeline: Pipeline,
+        metrics,
+        logger: Logger
+    ):
         splits = selection.split(data_set.X, data_set.y)
         splits_iter = enumerate(tqdm(splits, desc='Splits'))
 
-        batch_stats = utility.batch.Stats()
+        stats = utility.pipeline.Stats()
 
         with logger.get_child('splits') as splits_logger:
             # TODO: generator doesn't have length attribute
@@ -95,23 +129,23 @@ class Processor(ABC):
                         split_logger
                     )
 
-                    batch_stats.splits.append(split_stats)
+                    stats.splits.append(split_stats)
 
             logger.add_entry(
                 'summary',
-                batch_stats.aggregated_metrics
+                stats.aggregated_metrics
             )
 
             logger.add_entry(
                 'performance',
-                batch_stats.aggregated_performance
+                stats.aggregated_performance
             )
 
-            utility.plot.metrics(batch_stats.grouped_metrics, logger)
+            utility.plot.metrics(stats.grouped_metrics, logger)
 
-            self.__post_batch(batch_stats, logger)
+            self.__post_pipeline(stats, logger)
 
-        return batch_stats
+        return stats
 
     def __process_split(
         self,
@@ -156,7 +190,6 @@ class Processor(ABC):
         self.__post_split(data_set, test_y, pred_y, logger)
 
         return utility.split.Stats(
-            deepcopy(pipeline),
             evaluation,
             performance
         )

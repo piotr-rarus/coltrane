@@ -28,9 +28,9 @@ class Processor(BaseProcessor):
         confusion_matrix = get_confusion_matrix(test_y, pred_y)
         utility.plot.confusion_matrix(confusion_matrix, labels, logger)
 
-    def __post_batch(
+    def __post_pipeline(
         self,
-        batch_stats: utility.batch.Stats,
+        stats: utility.pipeline.Stats,
         logger: Logger,
         *args,
         **kwargs

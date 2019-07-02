@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import sklearn.metrics
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -16,51 +16,42 @@ __DATA_HOUSING = Path('tests/data/housing.csv')
 __RANDOM_STATE = 45625461
 
 
-def get_metrics():
-    return [
-        (
-            sklearn.metrics.explained_variance_score,
-            {
-                'multioutput': 'variance_weighted'
-            }
-        ),
-        sklearn.metrics.r2_score,
-        sklearn.metrics.mean_squared_error
-    ]
+def pipelines():
+    yield Pipeline(
+        steps=[
+            ('linear-regression', LinearRegression())
+        ]
+    )
+
+    yield Pipeline(
+        steps=[
+            ('standard-scaler', StandardScaler()),
+            ('Ridge', Ridge())
+        ]
+    )
+
+    yield Pipeline(
+        steps=[
+            ('standard-scaler', StandardScaler()),
+            ('SVR', SVR())
+        ]
+    )
 
 
 def batches():
 
     yield Batch(
-        data=file.io.csv.single.DataSet(path=__DATA_HOUSING),
-        pipeline=Pipeline(
-            steps=[
-                ('standard-scaler', StandardScaler()),
-                ('naive-bayes', LinearRegression())
-            ]
-        ),
+        data_set=file.io.csv.single.DataSet(path=__DATA_HOUSING),
+        pipelines=pipelines,
         selection=RepeatedKFold(
             n_splits=5,
             n_repeats=2,
             random_state=__RANDOM_STATE
         ),
-        metrics=get_metrics()
-    )
-
-    yield Batch(
-        data=file.io.csv.single.DataSet(path=__DATA_HOUSING),
-        pipeline=Pipeline(
-            steps=[
-                ('standard-scaler', StandardScaler()),
-                ('svc', SVR())
-            ]
-        ),
-        selection=RepeatedKFold(
-            n_splits=5,
-            n_repeats=2,
-            random_state=__RANDOM_STATE
-        ),
-        metrics=get_metrics()
+        metrics=[
+            sklearn.metrics.r2_score,
+            sklearn.metrics.mean_squared_error
+        ]
     )
 
 

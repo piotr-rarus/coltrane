@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from lazy_property import LazyProperty, LazyWritableProperty
+from lazy_property import LazyWritableProperty
 
 from . import base
 

@@ -2,7 +2,6 @@ import json
 from abc import ABC, abstractmethod, abstractproperty
 from pathlib import Path
 
-from lazy_property import LazyProperty
 from tqdm import tqdm
 
 

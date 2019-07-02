@@ -11,7 +11,7 @@ from sklearn.svm import SVC
 from coltrane import Batch, file
 from coltrane.classification import Inspector, Processor
 
-__LOGS = 'logs'
+__LOGS = Path('logs')
 __DATA_IRIS = Path('tests/data/iris.csv')
 
 __RANDOM_STATE = 45625461
@@ -41,32 +41,26 @@ def get_metrics():
         ]
 
 
+def pipelines():
+    yield Pipeline(
+        steps=[
+            ('naive-bayes', GaussianNB())
+        ]
+    )
+
+    yield Pipeline(
+        steps=[
+            ('standard-scaler', StandardScaler()),
+            ('svc', SVC(gamma='auto'))
+        ]
+    )
+
+
 def batches():
 
     yield Batch(
-        data=file.io.csv.single.DataSet(path=__DATA_IRIS),
-        pipeline=Pipeline(
-            steps=[
-                ('standard-scaler', StandardScaler()),
-                ('naive-bayes', GaussianNB())
-            ]
-        ),
-        selection=RepeatedKFold(
-            n_splits=5,
-            n_repeats=2,
-            random_state=__RANDOM_STATE
-        ),
-        metrics=get_metrics()
-    )
-
-    yield Batch(
-        data=file.io.csv.single.DataSet(path=__DATA_IRIS),
-        pipeline=Pipeline(
-            steps=[
-                ('standard-scaler', StandardScaler()),
-                ('svc', SVC(gamma='auto'))
-            ]
-        ),
+        data_set=file.io.csv.single.DataSet(path=__DATA_IRIS),
+        pipelines=pipelines,
         selection=RepeatedKFold(
             n_splits=5,
             n_repeats=2,

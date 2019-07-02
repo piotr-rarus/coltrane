@@ -1,2 +1,2 @@
 # flake8: noqa
-from . import aggregate, batch, metric, plot, split
+from . import aggregate, metric, pipeline, plot, split

@@ -21,9 +21,9 @@ class Processor(BaseProcessor):
     ):
         pass
 
-    def __post_batch(
+    def __post_pipeline(
         self,
-        batch_stats: utility.batch.Stats,
+        stats: utility.pipeline.Stats,
         logger: Logger,
         *args,
         **kwargs

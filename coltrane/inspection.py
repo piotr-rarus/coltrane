@@ -1,6 +1,6 @@
-import os
 from abc import ABC, abstractmethod
 from typing import Generator
+from pathlib import Path
 
 import numpy as np
 from austen import Logger
@@ -36,11 +36,7 @@ class Inspector(ABC):
         for data_set in tqdm(data(), desc='Data'):
             data_set.pprint()
 
-            output = os.path.join(
-                output,
-                data_set.name,
-                'inspection'
-            )
+            output = Path(output, data_set.name, 'inspection')
 
             with Logger(output) as logger:
                 logger.add_entry('data', data_set.as_dict())
