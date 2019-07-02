@@ -7,6 +7,7 @@ from austen import Logger
 from colorama import init
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
+from hashlib import md5
 
 from . import utility
 from .batch import Batch
@@ -93,10 +94,11 @@ class Processor(ABC):
     ) -> Dict[str, utility.pipeline.Stats]:
 
         stats = {}
+        pipeline_iter = enumerate(tqdm(batch.pipelines(), desc='Pipelines'))
 
-        for pipeline in tqdm(batch.pipelines(), desc='Pipelines'):
+        for index, pipeline in pipeline_iter:
 
-            pipeline_hash = str(hash(pipeline))
+            pipeline_hash = md5(str(pipeline).encode('utf-8')).hexdigest()
             pipeline_dir = batch_dir.joinpath(pipeline_hash)
 
             with Logger(pipeline_dir) as pipeline_logger:

@@ -24,7 +24,7 @@ setuptools.setup(
         'scipy',
         'pandas',
         'scikit-learn',
-        'matplotlib'
+        'matplotlib',
         'seaborn',
         'tqdm',
         'pytest',
