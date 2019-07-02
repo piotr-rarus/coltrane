@@ -1,8 +1,5 @@
 from dataclasses import dataclass
 
-from lazy_property import LazyProperty
-from sklearn.pipeline import Pipeline
-
 
 @dataclass(init=True)
 class Performance():
@@ -16,6 +13,5 @@ class Performance():
 
 @dataclass(init=True)
 class Stats():
-    pipeline: Pipeline
     metrics: dict
     performance: Performance
