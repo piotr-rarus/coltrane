@@ -45,7 +45,7 @@ def batches():
         pipelines=pipelines,
         selection=RepeatedKFold(
             n_splits=5,
-            n_repeats=2,
+            n_repeats=10,
             random_state=__RANDOM_STATE
         ),
         metrics=[

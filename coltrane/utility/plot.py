@@ -92,7 +92,7 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     logger.save_fig(figure, plot_name)
 
 
-def metrics(metrics, logger: Logger):
+def metrics(metrics, logger: Logger, plot_name=None):
     """
     Plots and dumps aggregated metrics.
 
@@ -113,8 +113,14 @@ def metrics(metrics, logger: Logger):
         else:
             other[metric] = values
 
-    __metrics(normalized, logger, 'metrics-normalized')
-    __metrics(other, logger, 'metrics-other')
+    if not plot_name:
+        plot_name = 'metrics'
+
+    if not normalized.empty:
+        __metrics(normalized, logger, plot_name + '-normalized')
+
+    if not other.empty:
+        __metrics(other, logger, plot_name + '-other')
 
 
 @__disposable_plot
