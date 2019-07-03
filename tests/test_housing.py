@@ -10,7 +10,6 @@ from sklearn.svm import SVR
 
 from coltrane import Batch, file
 from coltrane.regression import Inspector, Processor
-from xgboost import XGBRegressor
 
 __LOGS = 'logs'
 __DATA_HOUSING = Path('tests/data/housing.csv')
@@ -22,36 +21,29 @@ def pipelines():
 
     yield Pipeline(
         steps=[
-            ('robust-scaler', RobustScaler())
+            ('robust-scaler', RobustScaler()),
             ('linear', LinearRegression())
         ]
     )
 
     yield Pipeline(
         steps=[
-            ('robust-scaler', RobustScaler())
+            ('robust-scaler', RobustScaler()),
             ('ridge', Ridge())
         ]
     )
 
     yield Pipeline(
         steps=[
-            ('robust-scaler', RobustScaler())
+            ('robust-scaler', RobustScaler()),
             ('kernel-ridge', KernelRidge())
         ]
     )
 
     yield Pipeline(
         steps=[
-            ('robust-scaler', RobustScaler())
+            ('robust-scaler', RobustScaler()),
             ('svr', SVR(gamma='scale'))
-        ]
-    )
-
-    yield Pipeline(
-        steps=[
-            ('robust-scaler', RobustScaler())
-            ('xgboost', XGBRegressor())
         ]
     )
 
@@ -63,7 +55,7 @@ def batches():
         pipelines=pipelines,
         selection=RepeatedKFold(
             n_splits=5,
-            n_repeats=5,
+            n_repeats=2,
             random_state=__RANDOM_STATE
         ),
         metrics=[
