@@ -117,17 +117,10 @@ def metrics(metrics, logger: Logger, plot_name=None):
         plot_name = 'metrics'
 
     if not normalized.empty:
-        __metrics(normalized, logger, plot_name + '-normalized')
+        boxenplot(normalized, logger, plot_name + '-normalized')
 
     if not other.empty:
-        __metrics(other, logger, plot_name + '-other')
-
-
-@__disposable_plot
-def __metrics(metrics: pd.DataFrame, logger: Logger, plot_name: str):
-    figure = sns.boxenplot(data=metrics).figure
-    plt.title(plot_name)
-    logger.save_fig(figure, plot_name)
+        boxenplot(other, logger, plot_name + '-other')
 
 
 def confusion_matrix(
@@ -165,6 +158,25 @@ def confusion_matrix(
         ylabel='Ground truth',
         xlabel='Predicted'
     )
+
+
+@__disposable_plot
+def boxenplot(data: pd.DataFrame, logger: Logger, plot_name: str):
+
+    ax = sns.boxenplot(data=data)
+
+    # ax.set_xticklabels(
+    #     ax.get_xticklabels(),
+    #     rotation=40,
+    #     ha="right",
+    #     fontsize=7
+    # )
+
+    # plt.tight_layout()
+    # ax.figure.autofmt_xdate()
+
+    plt.title(plot_name)
+    logger.save_fig(ax.figure, plot_name)
 
 
 @__disposable_plot
