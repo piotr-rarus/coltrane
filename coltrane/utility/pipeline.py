@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from . import aggregate, split
+from . import aggregate, metric, split
 
 
 @dataclass()
@@ -55,8 +55,8 @@ class Stats():
 
         aggregated = {}
 
-        for metric, values in self.grouped_metrics.items():
-            aggregated[metric] = aggregate.Stats(values).as_dict()
+        for stat, values in self.grouped_metrics.items():
+            aggregated[stat] = aggregate.Stats(values).as_dict()
 
         return aggregated
 
@@ -82,15 +82,4 @@ class Stats():
             return {}
 
         metrics = [split.metrics for split in self.splits]
-
-        grouped = {}
-
-        for stat in metrics:
-            for metric, value in stat.items():
-
-                if metric not in grouped:
-                    grouped[metric] = []
-
-                grouped[metric].append(value)
-
-        return grouped
+        return metric.group(metrics)

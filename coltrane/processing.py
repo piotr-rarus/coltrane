@@ -1,17 +1,17 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from timeit import default_timer as timer
-from typing import Generator, List
+from typing import Dict, Generator, List
 
 from austen import Logger
 from colorama import init
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
-from pathlib import Path
+from hashlib import md5
 
 from . import utility
 from .batch import Batch
 from .file.io.base import DataSet
-
 
 init()
 
@@ -62,19 +62,43 @@ class Processor(ABC):
         for batch in tqdm(batches(), desc='Batches'):
             batch.pprint()
 
-            batch_dir = Path(output, batch.data_set.name)
-            with Logger(batch_dir) as batch_logger:
-                self.__process_batch(batch, batch_dir, batch_logger)
+            logs_dir = Path(output, batch.data_set.name)
+            with Logger(logs_dir) as logger:
+                stats = self.__process_batch(batch, logs_dir, logger)
+                self.__aggregate_batch(stats, logger)
+
+    def __aggregate_batch(
+        self,
+        batch_stats: Dict[str, utility.pipeline.Stats],
+        logger: Logger
+    ):
+        grouped = {}
+
+        with logger.get_child('aggregate') as logger:
+            for pipeline, stats in batch_stats.items():
+                for metric, values in stats.grouped_metrics.items():
+
+                    if metric not in grouped:
+                        grouped[metric] = {}
+
+                    grouped[metric][pipeline] = values
+
+            for metric, pipelines in grouped.items():
+                utility.plot.metrics(pipelines, logger, plot_name=metric)
 
     def __process_batch(
         self,
         batch: Batch,
         batch_dir: Path,
         logger: Logger
-    ):
-        for pipeline in tqdm(batch.pipelines(), desc='Pipelines'):
+    ) -> Dict[str, utility.pipeline.Stats]:
 
-            pipeline_hash = str(hash(pipeline))
+        stats = {}
+        pipeline_iter = enumerate(tqdm(batch.pipelines(), desc='Pipelines'))
+
+        for index, pipeline in pipeline_iter:
+
+            pipeline_hash = md5(str(pipeline).encode('utf-8')).hexdigest()
             pipeline_dir = batch_dir.joinpath(pipeline_hash)
 
             with Logger(pipeline_dir) as pipeline_logger:
@@ -84,13 +108,15 @@ class Processor(ABC):
                 batch_as_dict['pipeline'] = self.__pipeline_as_dict(pipeline)
                 pipeline_logger.save_json(batch_as_dict, 'batch')
 
-                self.__process_pipeline(
+                stats[pipeline_hash] = self.__process_pipeline(
                     batch.data_set,
                     batch.selection,
                     pipeline,
                     batch.metrics,
                     pipeline_logger
                 )
+
+        return stats
 
     def __pipeline_as_dict(self, pipeline: Pipeline):
         as_dict = {}
@@ -107,7 +133,8 @@ class Processor(ABC):
         pipeline: Pipeline,
         metrics,
         logger: Logger
-    ):
+    ) -> utility.pipeline.Stats:
+
         splits = selection.split(data_set.X, data_set.y)
         splits_iter = enumerate(tqdm(splits, desc='Splits'))
 
