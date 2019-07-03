@@ -5,7 +5,7 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
 from sklearn.svm import SVR
 
 from coltrane import Batch, file
@@ -22,30 +22,35 @@ def pipelines():
 
     yield Pipeline(
         steps=[
+            ('robust-scaler', RobustScaler())
             ('linear', LinearRegression())
         ]
     )
 
     yield Pipeline(
         steps=[
+            ('robust-scaler', RobustScaler())
             ('ridge', Ridge())
         ]
     )
 
     yield Pipeline(
         steps=[
+            ('robust-scaler', RobustScaler())
             ('kernel-ridge', KernelRidge())
         ]
     )
 
     yield Pipeline(
         steps=[
+            ('robust-scaler', RobustScaler())
             ('svr', SVR(gamma='scale'))
         ]
     )
 
     yield Pipeline(
         steps=[
+            ('robust-scaler', RobustScaler())
             ('xgboost', XGBRegressor())
         ]
     )
