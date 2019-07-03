@@ -1,6 +1,8 @@
 from pathlib import Path
 
 import sklearn.metrics
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.model_selection import RepeatedKFold
@@ -23,20 +25,6 @@ def pipelines():
         steps=[
             ('robust-scaler', RobustScaler()),
             ('linear', LinearRegression())
-        ]
-    )
-
-    yield Pipeline(
-        steps=[
-            ('robust-scaler', RobustScaler()),
-            ('ridge', Ridge())
-        ]
-    )
-
-    yield Pipeline(
-        steps=[
-            ('robust-scaler', RobustScaler()),
-            ('kernel-ridge', KernelRidge())
         ]
     )
 
