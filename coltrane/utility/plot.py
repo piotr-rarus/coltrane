@@ -80,11 +80,17 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     # data_set = np.hstack([records, labels])
     data_set = pd.DataFrame(data_set, columns=['X', 'Y', 'Class'])
 
+    markers = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
+    markers *= 10
+    label_count = len(np.unique(labels))
+    markers = markers[:label_count]
+
     figure = sns.scatterplot(
         x=data_set.X,
         y=data_set.Y,
         hue=data_set.Class,
-        style=data_set.Class
+        style=data_set.Class,
+        markers=markers
     ).get_figure()
 
     plt.title('Features distribution - PCA')
