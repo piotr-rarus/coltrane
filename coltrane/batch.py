@@ -1,27 +1,31 @@
 import json
-from typing import Generator, List, Tuple
+from dataclasses import dataclass
+from hashlib import blake2b
+from typing import Dict, List, Tuple
 
+from lazy import lazy
+from sklearn.base import TransformerMixin
+from sklearn.model_selection import BaseCrossValidator
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
+from coltrane.file.io.base import Data
+from typing import Dict
 
-from .file.io.base import DataSet
 
+@dataclass(frozen=True)
+class Batch:
 
-class Batch():
+    data: Data
+    pipeline: Pipeline
+    selection: BaseCrossValidator
+    metrics: List[Tuple]
+    encoder: TransformerMixin
+    multiprocessing: bool = False
 
-    def __init__(
-        self,
-        *,
-        data_set: DataSet,
-        pipelines: Generator[Pipeline, None, None],
-        selection,
-        metrics: List[Tuple]
-    ):
-
-        self.data_set = data_set
-        self.selection = selection
-        self.pipelines = pipelines
-        self.metrics = metrics
+    @lazy
+    def as_nice_hash(self) -> str:
+        encoded = str(id(self)).encode("utf-8")
+        return blake2b(encoded, digest_size=4).hexdigest()
 
     def as_dict(self):
         """
@@ -34,7 +38,8 @@ class Batch():
         """
 
         batch = {}
-        batch['data_set'] = self.data_set.as_dict()
+        batch['data'] = self.data.as_dict
+        batch["pipeline"] = self.pipeline_as_dict
 
         batch['selection'] = {
             'cv': self.selection.__class__.__name__,
@@ -55,6 +60,15 @@ class Batch():
         batch['metrics'] = metrics
 
         return batch
+
+    @lazy
+    def pipeline_as_dict(self) -> Dict:
+        as_dict = {}
+
+        for name, step in self.pipeline.steps:
+            as_dict[name] = vars(step)
+
+        return as_dict
 
     def pprint(self):
         """

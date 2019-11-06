@@ -1,13 +1,15 @@
-from abc import abstractproperty, abstractmethod
+from abc import abstractmethod, abstractproperty
 from pathlib import Path
+from typing import Callable, Dict
 
+import numpy as np
 import pandas as pd
-from lazy_property import LazyProperty, LazyWritableProperty
+from lazy import lazy
 
 from .. import base
 
 
-class DataSet(base.DataSet):
+class Data(base.Data):
     """
     Handles old school data sets.
     Data set should be .csv table.
@@ -28,19 +30,19 @@ class DataSet(base.DataSet):
 
         super().__init__(path)
 
-    @LazyWritableProperty
+    @lazy
     def __data_set(self) -> pd.DataFrame:
         return pd.read_csv(self.path)
 
-    @LazyProperty
+    @lazy
     def data(self) -> pd.DataFrame:
         return self.__data_set.iloc[:, 1:]
 
-    @LazyProperty
-    def name(self):
+    @lazy
+    def name(self) -> str:
         return self.path.stem
 
-    @LazyWritableProperty
+    @lazy
     def X(self):
         return self.__extract_X()
 
@@ -55,16 +57,17 @@ class DataSet(base.DataSet):
     def __extract_y(self):
         pass
 
-    @LazyProperty
+    @lazy
     def attributes(self):
         return self.__data_set.columns[1:-1].values
 
-    def as_dict(self):
-        base = super().as_dict()
-        base['path'] = self.path.name
-        return base
+    @lazy
+    def as_dict(self) -> Dict:
+        as_dict = super().as_dict
+        as_dict['path'] = self.path.name
+        return as_dict
 
-    def isna(self):
+    def isna(self) -> np.ndarray:
         """
         Detect missing values.
 
@@ -82,7 +85,7 @@ class DataSet(base.DataSet):
 
         return self.__data_set.isna()
 
-    def __preprocess(func):
+    def __preprocess(func: Callable):
 
         def wrapper(self, *args, **kwargs):
             func(self)

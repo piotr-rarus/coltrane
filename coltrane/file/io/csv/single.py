@@ -1,11 +1,10 @@
 from pathlib import Path
-
-from lazy_property import LazyWritableProperty
+from lazy import lazy
 
 from . import base
 
 
-class DataSet(base.DataSet):
+class Data(base.Data):
     """
     Handles old school data sets.
     Data set should be .csv table.
@@ -26,14 +25,15 @@ class DataSet(base.DataSet):
 
         super().__init__(path)
 
-    @LazyWritableProperty
+    @lazy
     def y(self):
         return self.__extract_y()
 
     def __extract_y(self):
         return self.__data_set.iloc[:, -1].values
 
+    @lazy
     def as_dict(self):
-        base = super().as_dict()
+        base = super().as_dict
         base['type'] = __name__,
         return base

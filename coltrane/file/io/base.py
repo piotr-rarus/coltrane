@@ -1,20 +1,15 @@
 import json
 from abc import ABC, abstractmethod, abstractproperty
 from pathlib import Path
+from typing import Dict
 
+from lazy import lazy
 from tqdm import tqdm
 
 
-class DataSet(ABC):
+class Data(ABC):
     """
     Abstract container for data set.
-
-    Parameters
-    ----------
-    ABC : class
-        Module from Python's standard lib,
-        used to implement abstract classes.
-
     """
 
     def __init__(self, path: Path):
@@ -68,7 +63,8 @@ class DataSet(ABC):
     def drop_duplicates(self):
         pass
 
-    def as_dict(self):
+    @lazy
+    def as_dict(self) -> Dict:
         return {
             'name': self.name,
         }

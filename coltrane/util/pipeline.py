@@ -8,9 +8,6 @@ from . import aggregate, metric, split
 class Stats():
     splits: List[split.Stats]
 
-    def __init__(self):
-        self.splits = []
-
     @property
     def aggregated_performance(self):
 
@@ -18,32 +15,18 @@ class Stats():
             return {}
 
         performances = [split.performance for split in self.splits]
-
-        dt_fit = [
-            performance.dt_fit
-            for performance
-            in performances
-        ]
-
-        dt_predict = [
-            performance.dt_predict
-            for performance
-            in performances
-        ]
+        dt_fit = [performance.dt_fit for performance in performances]
+        dt_predict = [performance.dt_predict for performance in performances]
 
         dt_predict_record = [
-            performance.dt_predict_record
-            for performance
-            in performances
+            performance.dt_predict_record for performance in performances
         ]
 
         aggregated = {}
 
-        aggregated['dt_fit'] = aggregate.Stats(dt_fit).as_dict()
-        aggregated['dt_predict'] = aggregate.Stats(dt_predict).as_dict()
-        aggregated['dt_predict_record'] = aggregate.Stats(
-            dt_predict_record
-        ).as_dict()
+        aggregated["dt_fit"] = aggregate.Stats(dt_fit).as_dict()
+        aggregated["dt_predict"] = aggregate.Stats(dt_predict).as_dict()
+        aggregated["dt_predict_record"] = aggregate.Stats(dt_predict_record).as_dict()
 
         return aggregated
 

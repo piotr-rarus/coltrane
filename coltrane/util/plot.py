@@ -194,7 +194,7 @@ def heatmap(
     xlabel=''
 ):
 
-    figure = sns.heatmap(data, annot=True).get_figure()
+    ax = sns.heatmap(data, linewidths=0.5)
 
     plt.title(plot_name)
 
@@ -204,4 +204,4 @@ def heatmap(
     if xlabel:
         plt.xlabel(xlabel)
 
-    logger.save_fig(figure, plot_name)
+    logger.save_fig(ax.get_figure(), plot_name, dpi=300)
