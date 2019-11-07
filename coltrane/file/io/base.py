@@ -36,11 +36,11 @@ class Data(ABC):
         pass
 
     @abstractproperty
-    def data(self):
+    def xy(self):
         pass
 
     @abstractproperty
-    def X(self):
+    def x(self):
         """
         This prop should return array of records.
         """
@@ -85,5 +85,5 @@ class Data(ABC):
         tqdm.write('\n' * 3)
 
         tqdm.write('Data set:')
-        tqdm.write(json.dumps(self.as_dict(), indent=4))
+        tqdm.write(json.dumps(self.as_dict, indent=4))
         tqdm.write('\n' * 3)

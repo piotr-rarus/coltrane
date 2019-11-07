@@ -1,8 +1,8 @@
 from austen import Logger
 
-from .. import utility
-from ..processing import Processor as BaseProcessor
-from ..file.io.base import DataSet
+from coltrane import util
+from coltrane.processing import Processor as BaseProcessor
+from coltrane.file.io.base import Data
 
 
 class Processor(BaseProcessor):
@@ -12,7 +12,7 @@ class Processor(BaseProcessor):
 
     def __post_split(
         self,
-        data_set: DataSet,
+        data_set: Data,
         test_y,
         pred_y,
         logger: Logger,
@@ -23,7 +23,7 @@ class Processor(BaseProcessor):
 
     def __post_pipeline(
         self,
-        stats: utility.pipeline.Stats,
+        stats: util.pipeline.Stats,
         logger: Logger,
         *args,
         **kwargs

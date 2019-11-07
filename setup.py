@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='coltrane',
-    version='0.1.0',
+    version='0.0.1',
     author='Piotr Rarus',
     author_email='piotr.rarus@gmail.com',
     description='Just another ML framework. Built on top of scikit-learn.',
@@ -27,9 +27,7 @@ setuptools.setup(
         'matplotlib',
         'seaborn',
         'tqdm',
-        'pytest',
-        'pytest_cov',
-        'lazy_property',
+        'lazy',
         'colorama',
         'austen'
     ],

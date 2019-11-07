@@ -19,7 +19,7 @@ def __disposable_plot(func):
 
 
 @__disposable_plot
-def labels_distribution(labels, logger: Logger, plot_name):
+def labels_distribution(labels, logger: Logger, plot_name: str):
     """
     Plots and dumps labels distribution.
     Plot will be dumped inside logger's scope.
@@ -34,8 +34,10 @@ def labels_distribution(labels, logger: Logger, plot_name):
         Dumped file name.
     """
 
+    labels = sorted(labels)
+
     figure = sns.countplot(x=labels).get_figure()
-    plt.title('Class balance')
+    plt.title(plot_name)
 
     logger.save_fig(figure, plot_name)
 
@@ -80,7 +82,11 @@ def features_distribution(records, labels, logger: Logger, plot_name):
     # data_set = np.hstack([records, labels])
     data_set = pd.DataFrame(data_set, columns=['X', 'Y', 'Class'])
 
-    markers = ('o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P', 'X')
+    markers = (
+        'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P',
+        'X'
+    )
+
     markers *= 10
     label_count = len(np.unique(labels))
     markers = markers[:label_count]

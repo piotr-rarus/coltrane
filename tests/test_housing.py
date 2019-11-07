@@ -1,17 +1,16 @@
 from pathlib import Path
 
 import sklearn.metrics
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
-from sklearn.kernel_ridge import KernelRidge
-from sklearn.linear_model import LinearRegression, Ridge
+from pytest import fixture
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
-from sklearn.svm import SVR
 
-from coltrane import Batch, file
+from coltrane import Batch
+from coltrane.file.io.csv.single import Data
 from coltrane.regression import Inspector, Processor
+
 
 __LOGS = 'logs'
 __DATA_HOUSING = Path('tests/data/housing.csv')
@@ -19,33 +18,37 @@ __DATA_HOUSING = Path('tests/data/housing.csv')
 __RANDOM_STATE = 45625461
 
 
-def pipelines():
+@fixture(scope='function')
+def data() -> Data:
+    return Data(path=__DATA_HOUSING)
 
-    yield Pipeline(
+
+@fixture(scope='function')
+def pipeline():
+    return Pipeline(
         steps=[
             ('robust-scaler', RobustScaler()),
             ('linear', LinearRegression())
         ]
     )
 
-    yield Pipeline(
-        steps=[
-            ('robust-scaler', RobustScaler()),
-            ('svr', SVR(gamma='scale'))
-        ]
+
+@fixture(scope='session')
+def selection():
+    return RepeatedKFold(
+        n_splits=5,
+        n_repeats=1,
+        random_state=__RANDOM_STATE
     )
 
 
-def batches():
+@fixture(scope='function')
+def batch(data: Data, pipeline: Pipeline, selection) -> Batch:
 
-    yield Batch(
-        data_set=file.io.csv.single.DataSet(path=__DATA_HOUSING),
-        pipelines=pipelines,
-        selection=RepeatedKFold(
-            n_splits=5,
-            n_repeats=2,
-            random_state=__RANDOM_STATE
-        ),
+    return Batch(
+        data,
+        pipeline,
+        selection,
         metrics=[
             sklearn.metrics.r2_score,
             sklearn.metrics.mean_squared_error
@@ -53,15 +56,11 @@ def batches():
     )
 
 
-def data_set():
-    yield file.io.csv.single.DataSet(path=__DATA_HOUSING)
-
-
-def test_inspection():
+def test_inspection(data: Data):
     inspector = Inspector()
-    inspector.inspect(data_set, output=__LOGS)
+    inspector.inspect([data], output=__LOGS)
 
 
-def test_regression():
+def test_regression(batch: Batch):
     processor = Processor()
-    processor.process(batches, output=__LOGS)
+    processor.process([batch], output=__LOGS)

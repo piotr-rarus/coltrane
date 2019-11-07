@@ -1,9 +1,9 @@
 from austen import Logger
 from sklearn.metrics import confusion_matrix as get_confusion_matrix
 
-from ..processing import Processor as BaseProcessor
-from .. import utility
-from ..file.io.base import DataSet
+from coltrane.processing import Processor as BaseProcessor
+from coltrane import util
+from coltrane.file.io.base import Data
 
 
 class Processor(BaseProcessor):
@@ -13,7 +13,7 @@ class Processor(BaseProcessor):
 
     def __post_split(
         self,
-        data_set: DataSet,
+        data_set: Data,
         test_y,
         pred_y,
         logger: Logger,
@@ -26,11 +26,11 @@ class Processor(BaseProcessor):
 
     def __plot_confusion_matrix(self, test_y, pred_y, labels, logger: Logger):
         confusion_matrix = get_confusion_matrix(test_y, pred_y)
-        utility.plot.confusion_matrix(confusion_matrix, labels, logger)
+        util.plot.confusion_matrix(confusion_matrix, labels, logger)
 
     def __post_pipeline(
         self,
-        stats: utility.pipeline.Stats,
+        stats: util.pipeline.Stats,
         logger: Logger,
         *args,
         **kwargs

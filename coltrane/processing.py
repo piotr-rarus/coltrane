@@ -7,7 +7,6 @@ from typing import Dict, Iterator, List
 
 from austen import Logger
 from colorama import init
-from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 
 from coltrane import Batch, util
@@ -86,8 +85,9 @@ class Processor(ABC):
         logger: Logger
     ) -> util.pipeline.Stats:
 
-        batch.encoder.fit(batch.data.y)
-        logger.save_obj(batch.encoder, 'encoder')
+        if batch.encoder:
+            batch.encoder.fit(batch.data.y)
+            logger.save_obj(batch.encoder, 'encoder')
 
         splits = batch.selection.split(batch.data.x, batch.data.y)
 
@@ -127,13 +127,15 @@ class Processor(ABC):
             metrics = batch.metrics
             encoder = batch.encoder
 
-            train_X = data.X[train_index]
+            train_X = data.x[train_index]
             train_y = data.y[train_index]
-            train_y = encoder.transform(train_y)
 
-            test_X = data.X[test_index]
+            test_X = data.x[test_index]
             test_y = data.y[test_index]
-            test_y = encoder.transform(test_y)
+
+            if encoder:
+                train_y = encoder.transform(train_y)
+                test_y = encoder.transform(test_y)
 
             start = timer()
             pipeline.fit(train_X, train_y)
@@ -146,13 +148,13 @@ class Processor(ABC):
             dt_predict = end - start
             dt_predict_record = dt_predict / len(pred_y)
 
-            performance = utility.split.Performance(
+            performance = util.split.Performance(
                 dt_fit,
                 dt_predict,
                 dt_predict_record
             )
 
-            evaluation = utility.metric.evaluate(test_y, pred_y, metrics)
+            evaluation = util.metric.evaluate(test_y, pred_y, metrics)
 
             logger.add_entry('metrics', evaluation)
             logger.add_entry('performance', performance.as_dict())
@@ -160,4 +162,4 @@ class Processor(ABC):
 
             self.__post_split(data, test_y, pred_y, logger)
 
-            return utility.split.Stats(evaluation, performance)
+            return util.split.Stats(evaluation, performance)

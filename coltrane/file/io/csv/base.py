@@ -35,7 +35,7 @@ class Data(base.Data):
         return pd.read_csv(self.path)
 
     @lazy
-    def data(self) -> pd.DataFrame:
+    def xy(self) -> pd.DataFrame:
         return self.__data_set.iloc[:, 1:]
 
     @lazy
@@ -43,7 +43,7 @@ class Data(base.Data):
         return self.path.stem
 
     @lazy
-    def X(self):
+    def x(self):
         return self.__extract_X()
 
     def __extract_X(self):
@@ -89,7 +89,7 @@ class Data(base.Data):
 
         def wrapper(self, *args, **kwargs):
             func(self)
-            self.X = self.__extract_X()
+            self.x = self.__extract_X()
             self.y = self.__extract_y()
             return
 

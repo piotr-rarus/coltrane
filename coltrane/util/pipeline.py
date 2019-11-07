@@ -24,9 +24,12 @@ class Stats():
 
         aggregated = {}
 
-        aggregated["dt_fit"] = aggregate.Stats(dt_fit).as_dict()
-        aggregated["dt_predict"] = aggregate.Stats(dt_predict).as_dict()
-        aggregated["dt_predict_record"] = aggregate.Stats(dt_predict_record).as_dict()
+        aggregated['dt_fit'] = aggregate.Stats(dt_fit).as_dict
+        aggregated['dt_predict'] = aggregate.Stats(dt_predict).as_dict
+
+        aggregated[
+            'dt_predict_record'
+        ] = aggregate.Stats(dt_predict_record).as_dict
 
         return aggregated
 

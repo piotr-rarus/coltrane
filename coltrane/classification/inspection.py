@@ -1,8 +1,8 @@
 from austen import Logger
 
-from ..file.io.base import DataSet
-from ..inspection import Inspector as Base
-from ..utility import aggregate, plot
+from coltrane.file.io.base import Data
+from coltrane.inspection import Inspector as Base
+from coltrane.util import aggregate, plot
 
 
 class Inspector(Base):
@@ -10,10 +10,10 @@ class Inspector(Base):
     def __init__(self):
         return super().__init__()
 
-    def __post_inspect(self, data_set: DataSet, logger: Logger):
+    def __post_inspect(self, data: Data, logger: Logger):
 
-        records = data_set.X
-        labels = data_set.y
+        records = data.x
+        labels = data.y
 
         summary = {}
         summary['balance'] = aggregate.balance(labels)

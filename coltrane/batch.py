@@ -9,7 +9,6 @@ from sklearn.model_selection import BaseCrossValidator
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
 from coltrane.file.io.base import Data
-from typing import Dict
 
 
 @dataclass(frozen=True)
@@ -19,7 +18,7 @@ class Batch:
     pipeline: Pipeline
     selection: BaseCrossValidator
     metrics: List[Tuple]
-    encoder: TransformerMixin
+    encoder: TransformerMixin = None
     multiprocessing: bool = False
 
     @lazy
@@ -27,6 +26,7 @@ class Batch:
         encoded = str(id(self)).encode("utf-8")
         return blake2b(encoded, digest_size=4).hexdigest()
 
+    @lazy
     def as_dict(self):
         """
         Pipeline's config summary.
@@ -39,7 +39,7 @@ class Batch:
 
         batch = {}
         batch['data'] = self.data.as_dict
-        batch["pipeline"] = self.pipeline_as_dict
+        batch['pipeline'] = self.pipeline_as_dict
 
         batch['selection'] = {
             'cv': self.selection.__class__.__name__,
@@ -73,14 +73,6 @@ class Batch:
     def pprint(self):
         """
         Pretty prints your data set and pipeline onto console using tqdm.
-
-        Parameters
-        ----------
-        data_set : DataSet
-            Instantiated data set.
-        pipeline : Pipeline
-            Configured pipeline template.
-
         """
 
         tqdm.write('\n' * 3)
@@ -88,5 +80,5 @@ class Batch:
         tqdm.write('\n' * 3)
 
         tqdm.write('Data set:')
-        tqdm.write(json.dumps(self.as_dict(), indent=4))
+        tqdm.write(json.dumps(self.as_dict, indent=4))
         tqdm.write('\n' * 3)
