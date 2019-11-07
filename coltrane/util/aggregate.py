@@ -32,7 +32,7 @@ def balance(labels):
 
     counts = aggregate[1]
 
-    summary['stats'] = Stats(counts).as_dict()
+    summary['stats'] = Stats(counts).as_dict
 
     return summary
 

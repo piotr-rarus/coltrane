@@ -42,7 +42,7 @@ class Stats():
         aggregated = {}
 
         for stat, values in self.grouped_metrics.items():
-            aggregated[stat] = aggregate.Stats(values).as_dict()
+            aggregated[stat] = aggregate.Stats(values).as_dict
 
         return aggregated
 
