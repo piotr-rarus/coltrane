@@ -7,7 +7,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='coltrane',
-    version='0.0.2',
+    version='0.0.3',
     author='Piotr Rarus',
     author_email='piotr.rarus@gmail.com',
     description='Just another ML framework. Built on top of scikit-learn.',

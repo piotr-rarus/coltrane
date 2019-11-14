@@ -41,8 +41,10 @@ def labels_distribution(labels, logger: Logger, plot_name: str):
 
     figure = sns.countplot(x=labels).get_figure()
     plt.title(plot_name)
+    plt.tight_layout()
 
-    logger.save_fig(figure, plot_name)
+
+    logger.save_fig(figure, plot_name, dpi=300)
 
 
 @__disposable_plot
