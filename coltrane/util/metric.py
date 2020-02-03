@@ -1,28 +1,12 @@
-def evaluate(test, pred, metrics):
+def evaluate(scorers, pipeline, x_test, y_test):
     stats = {}
 
-    for metric in metrics:
-        name, value = __evaluate(test, pred, metric)
-        stats[name] = value
+    for name, scorer in scorers.items():
+
+        score = scorer(pipeline, x_test, y_test)
+        stats[name] = score
 
     return stats
-
-
-def __evaluate(test, pred, metric):
-    op, kwargs = None, None
-
-    if type(metric) is tuple and len(metric) == 2:
-        op, kwargs = metric
-
-    elif callable(metric):
-        op = metric
-        kwargs = {}
-
-    value = op(test, pred, **kwargs)
-
-    name = op.__name__
-
-    return name, value
 
 
 def group(metrics):
