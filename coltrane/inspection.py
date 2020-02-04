@@ -18,7 +18,7 @@ class Inspector(ABC):
     def __init__(self):
         return super().__init__()
 
-    def inspect(self, data_sets: Iterator[Data], output: str):
+    def inspect(self, data: Data, output: Path):
         """
         Gain some insights from your data.
         This a priori knowledge will help you configure meaningful pipelines
@@ -26,56 +26,51 @@ class Inspector(ABC):
 
         Parameters
         ----------
-        data : Generator[DataSet, None, None]
-            Should yield instantiated `base.DataSet` objects.
+        data : Data
+            Your data set.
         output : str
             Points folder, where logs with stats will be dumped.
 
         """
 
-        for data in tqdm(data_sets, desc='Data'):
-            data.pprint()
+        data.pprint()
+        log_dir = Path(output, data.name, 'inspection')
 
-            output = Path(output, data.name, 'inspection')
+        with Logger(log_dir) as logger:
+            logger.add_entry('data', data.as_dict)
 
-            with Logger(output) as logger:
-                logger.add_entry('data', data.as_dict)
-                self.__inspect(data, logger)
+            x = data.x
 
-    def __inspect(self, data: Data, logger: Logger):
+            summary = {}
+            x_count, attributes_count = x.shape
 
-        x = data.x
+            summary['records'] = {}
+            summary['records']['count'] = x_count
 
-        summary = {}
-        x_count, attributes_count = x.shape
+            missing_values = np.count_nonzero(data.isna())
+            summary['records']['missing-values'] = missing_values
 
-        summary['records'] = {}
-        summary['records']['count'] = x_count
+            summary['attributes'] = {}
+            summary['attributes']['count'] = attributes_count
 
-        missing_values = np.count_nonzero(data.isna())
-        summary['records']['missing-values'] = missing_values
+            categorical_attributes = self.__get_categorical_attributes(data)
+            summary['attributes']['categorical'] = categorical_attributes
 
-        summary['attributes'] = {}
-        summary['attributes']['count'] = attributes_count
+            numerical_attributes = self.__get_numerical_attributes(data)
+            summary['attributes']['numerical'] = numerical_attributes
 
-        categorical_attributes = self.__get_categorical_attributes(data)
-        summary['attributes']['categorical'] = categorical_attributes
+            (
+                pearson,
+                kendall,
+                spearman
+            ) = self.__calc_correlation_maps(data, logger)
 
-        numerical_attributes = self.__get_numerical_attributes(data)
-        summary['attributes']['numerical'] = numerical_attributes
+            description = data.describe().to_dict()
+            logger.save_json(description, 'description')
 
-        (
-            pearson,
-            kendall,
-            spearman
-        ) = self.__calc_correlation_maps(data, logger)
+            logger.add_entry('summary', summary)
 
-        description = data.describe().to_dict()
-        logger.save_json(description, 'description')
-
-        logger.add_entry('summary', summary)
-
-        self.__post_inspect(data, logger)
+            self.__post_inspect(data, logger)
 
     @abstractmethod
     def __post_inspect(self, data: Data, logger: Logger):

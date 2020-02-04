@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from multiprocessing import Pool
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import Dict, Iterator, List
+from typing import List
 
 from austen import Logger
 from colorama import init
@@ -42,42 +42,22 @@ class Processor(ABC):
     ):
         pass
 
-    def process(self, batches: Iterator[Batch], output: Path):
+    def process(self, batch: Batch, output: Path) -> util.pipeline.Stats:
 
-        batch: Batch
+        batch.pprint()
 
-        for batch in tqdm(batches, desc='Batches'):
-            batch.pprint()
+        log_dir = Path(output, batch.data.name, batch.as_nice_hash)
+        with Logger(log_dir) as logger:
 
-            logs_dir = Path(output, batch.data.name, batch.as_nice_hash)
-            with Logger(logs_dir) as logger:
+            logger.save_json(batch.as_dict, 'batch')
 
-                logger.save_json(batch.as_dict, 'batch')
+            stats = self._process_batch(batch, logger)
 
-                stats = self._process_batch(batch, logger)
+            logger.add_entry('summary', stats.aggregated_scores)
+            logger.add_entry('performance', stats.aggregated_performance)
+            util.plot.metrics(stats.grouped_scores, logger)
 
-                logger.add_entry('summary', stats.aggregated_metrics)
-                logger.add_entry('performance', stats.aggregated_performance)
-                util.plot.metrics(stats.grouped_metrics, logger)
-
-    def __aggregate_batch(
-        self,
-        batch_stats: Dict[str, util.pipeline.Stats],
-        logger: Logger
-    ):
-        grouped = {}
-
-        with logger.get_child('aggregate') as logger:
-            for pipeline, stats in batch_stats.items():
-                for metric, values in stats.grouped_metrics.items():
-
-                    if metric not in grouped:
-                        grouped[metric] = {}
-
-                    grouped[metric][pipeline] = values
-
-            for metric, pipelines in grouped.items():
-                util.plot.metrics(pipelines, logger, plot_name=metric)
+            return stats
 
     def _process_batch(
         self,
@@ -124,42 +104,36 @@ class Processor(ABC):
 
             data = batch.data
             pipeline = batch.pipeline
-            metrics = batch.metrics
+            scorers = batch.scorers
             encoder = batch.encoder
 
-            train_X = data.x[train_index]
-            train_y = data.y[train_index]
+            x_train = data.x[train_index]
+            y_train = data.y[train_index]
 
-            test_X = data.x[test_index]
-            test_y = data.y[test_index]
+            x_test = data.x[test_index]
+            y_test = data.y[test_index]
 
             if encoder:
-                train_y = encoder.transform(train_y)
-                test_y = encoder.transform(test_y)
+                y_train = encoder.transform(y_train)
+                y_test = encoder.transform(y_test)
 
             start = timer()
-            pipeline.fit(train_X, train_y)
+            pipeline.fit(x_train, y_train)
             end = timer()
             dt_fit = end - start
 
-            start = timer()
-            pred_y = pipeline.predict(test_X)
-            end = timer()
-            dt_predict = end - start
-            dt_predict_record = dt_predict / len(pred_y)
-
             performance = util.split.Performance(
                 dt_fit,
-                dt_predict,
-                dt_predict_record
+                # dt_predict,
+                # dt_predict_record
             )
 
-            evaluation = util.metric.evaluate(test_y, pred_y, metrics)
+            scores = util.metric.evaluate(scorers, pipeline, x_test, y_test)
 
-            logger.add_entry('metrics', evaluation)
+            logger.add_entry('scores', scores)
             logger.add_entry('performance', performance.as_dict())
             logger.save_obj(pipeline, 'pipeline')
 
-            self.__post_split(data, test_y, pred_y, logger)
+            # self.__post_split(data, y_test, pred_y, logger)
 
-            return util.split.Stats(evaluation, performance)
+            return util.split.Stats(scores, performance)
