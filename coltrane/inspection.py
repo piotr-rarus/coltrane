@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Iterator
 from pathlib import Path
 
 import numpy as np

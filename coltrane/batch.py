@@ -5,7 +5,7 @@ from typing import Dict
 
 from lazy import lazy
 from sklearn.base import TransformerMixin
-from sklearn.metrics._scorer import _BaseScorer
+from sklearn.metrics.scorer import _BaseScorer
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
