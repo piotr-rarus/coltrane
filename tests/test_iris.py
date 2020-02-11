@@ -4,7 +4,7 @@ from typing import Dict
 from pytest import fixture
 from sklearn.metrics import (accuracy_score, f1_score, make_scorer,
                              precision_score, recall_score)
-from sklearn.metrics._scorer import _BaseScorer
+from sklearn.metrics.scorer import _BaseScorer
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
