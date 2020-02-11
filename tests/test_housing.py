@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import sklearn.metrics
 from pytest import fixture
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 from sklearn.model_selection import RepeatedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import RobustScaler
@@ -11,8 +11,7 @@ from coltrane import Batch
 from coltrane.file.io.csv.single import Data
 from coltrane.regression import Inspector, Processor
 
-
-__LOGS = 'logs'
+__LOG = Path('log')
 __DATA_HOUSING = Path('tests/data/housing.csv')
 
 __RANDOM_STATE = 45625461
@@ -49,18 +48,18 @@ def batch(data: Data, pipeline: Pipeline, selection) -> Batch:
         data,
         pipeline,
         selection,
-        metrics=[
-            sklearn.metrics.r2_score,
-            sklearn.metrics.mean_squared_error
-        ]
+        scorers={
+            'r2': make_scorer(r2_score),
+            'mse': make_scorer(mean_squared_error)
+        }
     )
 
 
 def test_inspection(data: Data):
     inspector = Inspector()
-    inspector.inspect([data], output=__LOGS)
+    inspector.inspect(data, output=__LOG)
 
 
 def test_regression(batch: Batch):
     processor = Processor()
-    processor.process([batch], output=__LOGS)
+    processor.process(batch, output=__LOG)

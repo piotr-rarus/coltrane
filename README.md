@@ -43,7 +43,7 @@ from coltrane.classification import Inspector, Processor
 from coltrane.file.io.csv.single import Data
 
 
-__LOGS = Path('logs')
+__LOG = Path('log')
 __DATA_IRIS = Path('/data/iris.csv')
 __RANDOM_STATE = 45625461
 
@@ -87,10 +87,10 @@ batch = Batch(
 )
 
 inspector = Inspector()
-inspector.inspect([data], output=__LOGS)
+inspector.inspect([data], output=__LOG)
 
 processor = Processor()
-processor.process([batch], output=__LOGS)
+processor.process([batch], output=__LOG)
 
 
 ```

@@ -39,10 +39,20 @@ def labels_distribution(labels, logger: Logger, plot_name: str):
 
     labels = sorted(labels)
 
-    figure = sns.countplot(x=labels).get_figure()
+    ax = sns.countplot(x=labels)
     plt.title(plot_name)
-    plt.tight_layout()
 
+    ax.set_xticklabels(
+        ax.get_xticklabels(),
+        rotation=40,
+        ha="right",
+        fontsize=7
+    )
+
+    plt.tight_layout()
+    ax.figure.autofmt_xdate()
+
+    figure = ax.get_figure()
 
     logger.save_fig(figure, plot_name, dpi=300)
 

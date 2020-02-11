@@ -1,13 +1,15 @@
 import json
 from dataclasses import dataclass
 from hashlib import blake2b
-from typing import Dict, List, Tuple
+from typing import Dict
 
 from lazy import lazy
 from sklearn.base import TransformerMixin
+from sklearn.metrics._scorer import _BaseScorer
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.pipeline import Pipeline
 from tqdm import tqdm
+
 from coltrane.file.io.base import Data
 
 
@@ -17,7 +19,7 @@ class Batch:
     data: Data
     pipeline: Pipeline
     selection: BaseCrossValidator
-    metrics: List[Tuple]
+    scorers: Dict[str, _BaseScorer]
     encoder: TransformerMixin = None
     multiprocessing: bool = False
 
@@ -50,12 +52,8 @@ class Batch:
 
         metrics = {}
 
-        for metric in self.metrics:
-            if type(metric) is tuple:
-                op, kwargs = metric
-                metrics[op.__name__] = kwargs
-            else:
-                metrics[metric.__name__] = {}
+        for name, metric in self.scorers.items():
+            metrics[name] = metric._kwargs
 
         batch['metrics'] = metrics
 
