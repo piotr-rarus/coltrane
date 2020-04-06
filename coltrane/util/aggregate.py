@@ -1,6 +1,8 @@
 import numpy as np
 
-from .stats import Stats
+# TODO
+# flake8: noqa
+from coltrane.util.stats import Stats
 
 
 """
@@ -29,10 +31,6 @@ def balance(labels):
 
     for label, count in np.transpose(aggregate):
         summary[str(label)] = count
-
-    counts = aggregate[1]
-
-    summary['stats'] = Stats(counts).as_dict
 
     return summary
 

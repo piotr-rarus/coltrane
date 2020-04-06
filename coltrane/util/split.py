@@ -4,8 +4,8 @@ from dataclasses import dataclass
 @dataclass(init=True)
 class Performance():
     dt_fit: float
-    dt_predict: float
-    dt_predict_record: float
+    # dt_predict: float
+    # dt_predict_record: float
 
     def as_dict(self):
         return self.__dict__

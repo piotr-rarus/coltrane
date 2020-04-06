@@ -1,218 +1,182 @@
-from austen import Logger
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
 # flake8: noqa
-import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import PCA
 
-
-sns.set()
-
-
-def __disposable_plot(func):
-    def wrapper(*args, **kwargs):
-        plt.figure(clear=True)
-        func(*args, **kwargs)
-        plt.close('all')
-
-    return wrapper
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+import plotly.offline as pyo
+from typing import Iterator, Dict
+import itertools
+import plotly.express as px
 
 
-@__disposable_plot
-def labels_distribution(labels, logger: Logger, plot_name: str):
-    """
-    Plots and dumps labels distribution.
-    Plot will be dumped inside logger's scope.
 
-    Parameters
-    ----------
-    labels : nd.array[N, 1]
-        Ground truth label for each record.
-    logger : Logger
-        Logger instance used to dump a plot.
-    plot_name : string
-        Dumped file name.
-    """
+class Plot:
 
-    labels = sorted(labels)
+    def __init__(
+        self,
+        image_width: int = 1200,
+        image_height: int = 900,
+        debug_mode: bool = False
+    ) -> None:
 
-    figure = sns.countplot(x=labels).get_figure()
-    plt.title(plot_name)
-    plt.tight_layout()
+        self.IMAGE_WIDTH = image_width
+        self.IMAGE_HEIGHT = image_height
+        self.DEBUG_MODE = debug_mode
 
+        if not self.DEBUG_MODE:
+            pyo.init_notebook_mode(connected=False)
+            pio.renderers.default = 'notebook'
 
-    logger.save_fig(figure, plot_name, dpi=300)
+    def class_balance(self, balance: Dict[str, int], filename='class_balance'):
+        """
+        Plots and dumps labels distribution.
 
+        Parameters
+        ----------
+        labels : Iterator[str]
+            Ground truth label for each record.
+        plot_name : string
+            Dumped file name.
+        """
 
-@__disposable_plot
-def distribution(values, logger: Logger, plot_name):
+        # labels = sorted(labels)
 
-    figure = sns.distplot(values).get_figure()
-    plt.title(plot_name)
+        labels = list(balance.keys())
+        counts = list(balance.values())
 
-    logger.save_fig(figure, plot_name)
+        fig = go.Figure()
 
+        bars = go.Bar(
+            x=labels,
+            y=counts,
+            text=counts,
+            textposition='auto'
+        )
 
-@__disposable_plot
-def features_distribution(records, labels, logger: Logger, plot_name):
-    """
-    Plots and dumps features distribution.
-    This method uses PCA algorithm to decompose features space.
-    Each label comes with it's unique color.
-    Plot will be dumped inside logger's scope.
+        fig.add_trace(bars)
 
-    Parameters
-    ----------
-    records : nd.array
-        Records from your data set.
-    labels : nd.array
-        Respective labels for each of the records.
-    logger : Logger
-        Logger instance used to dump a plot.
-    plot_name : string
-        Dumped file name.
-    """
+        pyo.iplot(
+            fig,
+            filename=filename,
+            image_width=self.IMAGE_WIDTH,
+            image_height=self.IMAGE_HEIGHT
+        )
 
-    if records.shape[1] > 2:
-        decomposer = PCA(n_components=2)
-        records = decomposer.fit(records).transform(records)
+    def features_distribution(
+        self,
+        records: np.ndarray,
+        labels: np.ndarray,
+        filename='features_distribution'
+    ):
+        """
+        Plots features distribution.
+        This method uses PCA algorithm to decompose features space.
+        Each label comes with it's unique color.
 
-    # TODO: this works only for single-label
-    labels = np.reshape(labels, (len(labels), 1))
+        Parameters
+        ----------
+        records : nd.array
+            Records from your data set.
+        labels : nd.array
+            Respective labels for each of the records.
+        """
 
-    data_set = np.concatenate([records, labels], axis=1)
-    # data_set = np.hstack([records, labels])
-    data_set = pd.DataFrame(data_set, columns=['X', 'Y', 'Class'])
+        if records.shape[1] > 2:
+            decomposer = PCA(n_components=2)
+            records = decomposer.fit(records).transform(records)
 
-    markers = (
-        'o', 'v', '^', '<', '>', '8', 's', 'p', '*', 'h', 'H', 'D', 'd', 'P',
-        'X'
-    )
+        labels = np.reshape(labels, (len(labels), 1))
 
-    markers *= 10
-    label_count = len(np.unique(labels))
-    markers = markers[:label_count]
+        data_frame = np.concatenate([records, labels], axis=1)
+        data_frame = pd.DataFrame(data_frame, columns=['x', 'y', 'label'])
 
-    figure = sns.scatterplot(
-        x=data_set.X,
-        y=data_set.Y,
-        hue=data_set.Class,
-        style=data_set.Class,
-        markers=markers
-    ).get_figure()
+        fig = px.scatter(data_frame, x='x', y='y', color='label')
 
-    plt.title('Features distribution - PCA')
-
-    logger.save_fig(figure, plot_name)
-
-
-def metrics(metrics, logger: Logger, plot_name=None):
-    """
-    Plots and dumps aggregated metrics.
-
-    Parameters
-    ----------
-    metrics : dict
-        Regrouped metrics dictionary, by label, by measure.
-    logger : Logger
-        Logger instance used to dump a plot.
-    """
-
-    normalized = pd.DataFrame()
-    other = pd.DataFrame()
-
-    for metric, values in metrics.items():
-        if np.max(values) <= 1.0:
-            normalized[metric] = values
-        else:
-            other[metric] = values
-
-    if not plot_name:
-        plot_name = 'metrics'
-
-    if not normalized.empty:
-        boxenplot(normalized, logger, plot_name + '-normalized')
-
-    if not other.empty:
-        boxenplot(other, logger, plot_name + '-other')
+        pyo.iplot(
+            fig,
+            filename=filename,
+            image_width=self.IMAGE_WIDTH,
+            image_height=self.IMAGE_HEIGHT
+        )
 
 
-def confusion_matrix(
-    confusion_matrix,
-    classes,
-    logger: Logger
-):
-    """
-    Plots and dumps confusion matrix. I know that side effects are bad,
-    but that's just how matplotlib works internally.
-    I need to handle plot disposal here, hence the need to dump plot inside
-    this function.
-    Plot will be dumped inside logger's scope.
+    def heatmap(
+        self,
+        data: pd.DataFrame,
+        plot_name: str,
+        ylabel='',
+        xlabel='',
+        filename=''
+    ):
+        fig = go.Figure()
 
-    Parameters
-    ----------
-    confusion_matrix : nd.array
-    classes : nd.array[N_classes]
-        List of your class labels.
-        It'll be used to fill indices and columns on plot.
-    logger : Logger
-        Logger instance used to dump a plot.
-    """
+        columns = list(data.columns)
 
-    confusion_matrix = pd.DataFrame(
-        confusion_matrix,
-        index=classes,
-        columns=classes
-    )
+        heatmap = go.Heatmap(
+            z=data.to_numpy(),
+            y=columns,
+            x=columns,
+            colorscale='Viridis'
+        )
 
-    heatmap(
-        confusion_matrix,
-        logger,
-        plot_name='confusion-matrix',
-        ylabel='Ground truth',
-        xlabel='Predicted'
-    )
+        fig.add_trace(heatmap)
 
+        fig.update_layout(
+            title=plot_name
+        )
 
-@__disposable_plot
-def boxenplot(data: pd.DataFrame, logger: Logger, plot_name: str):
+        pyo.iplot(
+            fig,
+            filename=filename,
+            image_width=self.IMAGE_WIDTH,
+            image_height=self.IMAGE_HEIGHT
+        )
 
-    ax = sns.boxenplot(data=data)
+    def metrics(self, metrics: dict, filename: str = ''):
+        """
+        Plots and dumps aggregated metrics.
 
-    # ax.set_xticklabels(
-    #     ax.get_xticklabels(),
-    #     rotation=40,
-    #     ha="right",
-    #     fontsize=7
-    # )
+        Parameters
+        ----------
+        metrics : dict
+            Regrouped metrics dictionary, by label, by measure.
+        """
 
-    # plt.tight_layout()
-    # ax.figure.autofmt_xdate()
+        normalized = {}
+        other = {}
 
-    plt.title(plot_name)
-    logger.save_fig(ax.figure, plot_name)
+        for metric, values in metrics.items():
+            if np.max(values) <= 1.0:
+                normalized[metric] = values
+            else:
+                other[metric] = values
 
+        if normalized:
+            self.boxplot(normalized)
 
-@__disposable_plot
-def heatmap(
-    data: pd.DataFrame,
-    logger: Logger,
-    plot_name: str,
-    ylabel='',
-    xlabel=''
-):
+        if other:
+            self.boxplot(other)
 
-    ax = sns.heatmap(data, linewidths=0.5)
+    def boxplot(self, data: dict, filename: str = ''):
 
-    plt.title(plot_name)
+        fig = go.Figure()
 
-    if ylabel:
-        plt.ylabel(ylabel)
+        for metric, values in data.items():
 
-    if xlabel:
-        plt.xlabel(xlabel)
+            fig.add_trace(
+                go.Box(
+                    y=values,
+                    name=metric
+                )
+            )
 
-    logger.save_fig(ax.get_figure(), plot_name, dpi=300)
+        pyo.iplot(
+            fig,
+            filename=filename,
+            image_width=self.IMAGE_WIDTH,
+            image_height=self.IMAGE_HEIGHT
+        )

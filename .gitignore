@@ -107,7 +107,7 @@ venv.bak/
 .vscode/
 env/
 logs/
+log/
 inspection/
-data/protein/
 
 cov\.xml

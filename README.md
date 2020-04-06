@@ -43,13 +43,13 @@ from coltrane.classification import Inspector, Processor
 from coltrane.file.io.csv.single import Data
 
 
-__LOGS = Path('logs')
+__LOG = Path('log')
 __DATA_IRIS = Path('/data/iris.csv')
 __RANDOM_STATE = 45625461
 
 
 batch = Batch(
-    data=Data(path=__DATA_IRIS),
+    data,
     pipeline=Pipeline(
         steps=[
             ('standard-scaler', StandardScaler()),
@@ -58,39 +58,24 @@ batch = Batch(
     ),
     selection=RepeatedStratifiedKFold(
         n_splits=5,
-        n_repeats=1,
+        n_repeats=4,
         random_state=__RANDOM_STATE
     ),
-    metrics=[
-        accuracy_score,
-        (
-            precision_score,
-            {
-                'average': 'weighted'
-            }
-        ),
-        (
-            recall_score,
-            {
-                'average': 'weighted'
-            }
-        ),
-        (
-            f1_score,
-            {
-                'average': 'weighted'
-            }
-        )
-    ],
-    encoder=LabelEncoder(),
-    multiprocessing=True
+    scorers={
+        'accuracy': make_scorer(accuracy_score),
+        'precision': make_scorer(precision_score, average='macro'),
+        'recall': make_scorer(recall_score, average='macro'),
+        'f1': make_scorer(f1_score, average='macro')
+    },
+    encoder=LabelEncoder()
 )
 
+
 inspector = Inspector()
-inspector.inspect([data], output=__LOGS)
+inspector.inspect([data], output=__LOG)
 
 processor = Processor()
-processor.process([batch], output=__LOGS)
+processor.process([batch], output=__LOG)
 
 
 ```
