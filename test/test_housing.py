@@ -12,7 +12,7 @@ from coltrane.file.io.csv.single import Data
 from coltrane.regression import Inspector, Processor
 
 __LOG = Path('log')
-__DATA_HOUSING = Path('tests/data/housing.csv')
+__DATA_HOUSING = Path('test/data/housing.csv')
 
 __RANDOM_STATE = 45625461
 

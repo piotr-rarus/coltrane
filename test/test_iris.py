@@ -15,7 +15,7 @@ from coltrane.classification import Inspector, Processor
 from coltrane.file.io.csv.single import Data
 
 __LOG = Path('log')
-__DATA_IRIS = Path('tests/data/iris.csv')
+__DATA_IRIS = Path('test/data/iris.csv')
 __RANDOM_STATE = 45625461
 
 
