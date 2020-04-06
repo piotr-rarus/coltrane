@@ -1,5 +1,7 @@
 import numpy as np
 
+from coltrane.util.stats import Stats
+
 
 """
 Utility functions for model evaluation stats/performance aggregation.

@@ -13,4 +13,5 @@ class Inspector(Base):
     def __post_inspect(self, data: Data, logger: Logger):
         y = data.y
 
-        plot.distribution(y, logger, 'target distribution')
+        # TODO
+        # plot.distribution(y, logger, 'target distribution')
