@@ -1,5 +1,9 @@
 import numpy as np
 
+# TODO
+# flake8: noqa
+from coltrane.util.stats import Stats
+
 
 """
 Utility functions for model evaluation stats/performance aggregation.
