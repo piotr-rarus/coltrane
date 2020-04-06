@@ -49,7 +49,7 @@ __RANDOM_STATE = 45625461
 
 
 batch = Batch(
-    data=Data(path=__DATA_IRIS),
+    data,
     pipeline=Pipeline(
         steps=[
             ('standard-scaler', StandardScaler()),
@@ -58,33 +58,18 @@ batch = Batch(
     ),
     selection=RepeatedStratifiedKFold(
         n_splits=5,
-        n_repeats=1,
+        n_repeats=4,
         random_state=__RANDOM_STATE
     ),
-    metrics=[
-        accuracy_score,
-        (
-            precision_score,
-            {
-                'average': 'weighted'
-            }
-        ),
-        (
-            recall_score,
-            {
-                'average': 'weighted'
-            }
-        ),
-        (
-            f1_score,
-            {
-                'average': 'weighted'
-            }
-        )
-    ],
-    encoder=LabelEncoder(),
-    multiprocessing=True
+    scorers={
+        'accuracy': make_scorer(accuracy_score),
+        'precision': make_scorer(precision_score, average='macro'),
+        'recall': make_scorer(recall_score, average='macro'),
+        'f1': make_scorer(f1_score, average='macro')
+    },
+    encoder=LabelEncoder()
 )
+
 
 inspector = Inspector()
 inspector.inspect([data], output=__LOG)
