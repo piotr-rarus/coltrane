@@ -72,7 +72,6 @@ class Inspector(ABC):
 
             logger.add_entry('summary', summary)
 
-
     @abstractmethod
     def __post_inspect(self, data: Data, logger: Logger):
         pass

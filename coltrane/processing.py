@@ -10,7 +10,7 @@ from colorama import init
 from tqdm import tqdm
 
 from coltrane import Batch, util
-from coltrane.util import  Plot
+from coltrane.util import Plot
 from coltrane.file.io.base import Data
 
 init()

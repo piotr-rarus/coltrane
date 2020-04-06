@@ -1,7 +1,5 @@
 import numpy as np
 
-from .stats import Stats
-
 
 """
 Utility functions for model evaluation stats/performance aggregation.
@@ -29,10 +27,6 @@ def balance(labels):
 
     for label, count in np.transpose(aggregate):
         summary[str(label)] = count
-
-    counts = aggregate[1]
-
-    # summary['stats'] = Stats(counts).as_dict
 
     return summary
 
