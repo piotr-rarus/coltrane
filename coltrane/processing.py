@@ -10,6 +10,7 @@ from colorama import init
 from tqdm import tqdm
 
 from coltrane import Batch, util
+from coltrane.util import  Plot
 from coltrane.file.io.base import Data
 
 init()
@@ -18,7 +19,8 @@ init()
 class Processor(ABC):
 
     def __init__(self):
-        return super().__init__()
+        super(Processor, self).__init__()
+        self.plot = Plot()
 
     @abstractmethod
     def __post_split(
@@ -44,7 +46,7 @@ class Processor(ABC):
 
     def process(self, batch: Batch, output: Path) -> util.pipeline.Stats:
 
-        batch.pprint()
+        # batch.pprint()
 
         log_dir = Path(output, batch.data.name, batch.as_nice_hash)
         with Logger(log_dir) as logger:
@@ -55,7 +57,7 @@ class Processor(ABC):
 
             logger.add_entry('summary', stats.aggregated_scores)
             logger.add_entry('performance', stats.aggregated_performance)
-            util.plot.metrics(stats.grouped_scores, logger)
+            self.plot.metrics(stats.grouped_scores)
 
             return stats
 

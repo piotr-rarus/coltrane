@@ -6,7 +6,7 @@ from austen import Logger
 from colorama import init
 
 from coltrane.file.io.base import Data
-from coltrane.util import plot
+from coltrane.util import Plot
 
 init()
 
@@ -14,7 +14,9 @@ init()
 class Inspector(ABC):
 
     def __init__(self):
-        return super().__init__()
+        super(Inspector, self).__init__()
+
+        self.plot = Plot()
 
     def inspect(self, data: Data, output: Path):
         """
@@ -31,7 +33,7 @@ class Inspector(ABC):
 
         """
 
-        data.pprint()
+        # data.pprint()
         log_dir = Path(output, data.name, 'inspection')
 
         with Logger(log_dir) as logger:
@@ -57,6 +59,8 @@ class Inspector(ABC):
             numerical_attributes = self.__get_numerical_attributes(data)
             summary['attributes']['numerical'] = numerical_attributes
 
+            summary['post'] = self.__post_inspect(data, logger)
+
             (
                 pearson,
                 kendall,
@@ -68,7 +72,6 @@ class Inspector(ABC):
 
             logger.add_entry('summary', summary)
 
-            self.__post_inspect(data, logger)
 
     @abstractmethod
     def __post_inspect(self, data: Data, logger: Logger):
@@ -103,12 +106,12 @@ class Inspector(ABC):
         data = data.xy
 
         pearson = data.corr(method='pearson')
-        plot.heatmap(pearson, logger, 'pearson')
+        self.plot.heatmap(pearson, 'Pearson')
 
         kendall = data.corr(method='kendall')
-        plot.heatmap(kendall, logger, 'kendall')
+        self.plot.heatmap(kendall, 'Kendall')
 
         spearman = data.corr(method='spearman')
-        plot.heatmap(spearman, logger, 'spearman')
+        self.plot.heatmap(spearman, 'Spearman')
 
         return pearson, kendall, spearman

@@ -81,8 +81,6 @@ class Data(ABC):
         """
 
         tqdm.write('\n' * 3)
-        tqdm.write('=' * 100)
-        tqdm.write('\n' * 3)
 
         tqdm.write('Data set:')
         tqdm.write(json.dumps(self.as_dict, indent=4))
