@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict
 
 from lazy import lazy
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 class Data(ABC):

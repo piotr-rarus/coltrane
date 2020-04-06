@@ -7,7 +7,7 @@ from typing import List
 
 from austen import Logger
 from colorama import init
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from coltrane import Batch, util
 from coltrane.util import Plot

@@ -8,7 +8,7 @@ from sklearn.base import TransformerMixin
 from sklearn.metrics.scorer import _BaseScorer
 from sklearn.model_selection import BaseCrossValidator
 from sklearn.pipeline import Pipeline
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from coltrane.file.io.base import Data
 
