@@ -1,3 +1,5 @@
+from typing import Dict
+
 from austen import Logger
 
 from coltrane.file.io.base import Data
@@ -19,8 +21,16 @@ class Inspector(Base):
         balance = aggregate.balance(labels)
         summary['balance'] = balance
 
-        self.plot.class_balance(balance)
-
-        self.plot.features_distribution(records, labels)
-
         return summary
+
+    def plot_features_distribution(self, data: Data):
+        self.plot.features_distribution(data.x, data.y)
+
+    def get_class_balance(self, data: Data):
+        labels = data.y
+
+        balance = aggregate.balance(labels)
+        return balance
+
+    def plot_class_balance(self, balance: Dict[str, int]):
+        self.plot.class_balance(balance)

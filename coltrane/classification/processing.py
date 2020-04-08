@@ -26,7 +26,7 @@ class Processor(BaseProcessor):
 
     def __plot_confusion_matrix(self, test_y, pred_y, labels, logger: Logger):
         confusion_matrix = get_confusion_matrix(test_y, pred_y)
-        util.plot.confusion_matrix(confusion_matrix, labels, logger)
+        self.plot.heatmap(confusion_matrix, 'Confusion matrix', labels, labels)
 
     def __post_pipeline(
         self,
