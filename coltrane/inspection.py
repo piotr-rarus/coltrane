@@ -4,7 +4,6 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from austen import Logger
-from colorama import init
 
 from coltrane.file.io.base import Data
 from coltrane.util import Plot

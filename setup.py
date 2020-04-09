@@ -21,7 +21,6 @@ setuptools.setup(
     ),
     install_requires=[
         'austen==0.2.7',
-        'colorama==0.4.3',
         'joblib==0.14.1',
         'jupyter==1.0.0',
         'lazy==1.4',
