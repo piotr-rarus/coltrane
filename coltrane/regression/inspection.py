@@ -2,7 +2,6 @@ from austen import Logger
 
 from coltrane.file.io.base import Data
 from coltrane.inspection import Inspector as Base
-# from coltrane.util import plot
 
 
 class Inspector(Base):
@@ -11,7 +10,16 @@ class Inspector(Base):
         return super().__init__()
 
     def __post_inspect(self, data: Data, logger: Logger):
-        # y = data.y
         pass
-        # TODO
-        # plot.distribution(y, logger, 'target distribution')
+
+    def plot_target_distribution(self, data: Data):
+        """
+        Plots target distribution into the notebook.
+
+        Parameters
+        ----------
+        data : Data
+            Your data set.
+        """
+
+        self.plot.distribution(data.y, 'Target Distribution')

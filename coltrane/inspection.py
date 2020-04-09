@@ -2,13 +2,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from austen import Logger
-from colorama import init
 
 from coltrane.file.io.base import Data
 from coltrane.util import Plot
-
-init()
 
 
 class Inspector(ABC):
@@ -61,16 +59,27 @@ class Inspector(ABC):
 
             summary['post'] = self.__post_inspect(data, logger)
 
-            (
-                pearson,
-                kendall,
-                spearman
-            ) = self.__calc_correlation_maps(data, logger)
-
             description = data.describe().to_dict()
-            logger.save_json(description, 'description')
 
-            logger.add_entry('summary', summary)
+            logger.save_json(description, 'description')
+            logger.save_json(summary, 'summary')
+
+            return summary
+
+    def calculate_correlation(self, data: Data, method: str = 'pearson'):
+        data = data.xy
+        corr = data.corr(method=method)
+        # self.plot.heatmap(kendall, 'Kendall')
+
+        return corr
+
+    def plot_correlation(self, corr: pd.DataFrame, plot_name: str):
+        self.plot.heatmap(
+            corr.to_numpy(),
+            plot_name,
+            list(corr.columns),
+            list(corr.columns)
+        )
 
     @abstractmethod
     def __post_inspect(self, data: Data, logger: Logger):
@@ -100,17 +109,3 @@ class Inspector(ABC):
 
     def __any_categorical(self, values):
         return any(type(value) is str for value in values)
-
-    def __calc_correlation_maps(self, data: Data, logger: Logger):
-        data = data.xy
-
-        pearson = data.corr(method='pearson')
-        self.plot.heatmap(pearson, 'Pearson')
-
-        kendall = data.corr(method='kendall')
-        self.plot.heatmap(kendall, 'Kendall')
-
-        spearman = data.corr(method='spearman')
-        self.plot.heatmap(spearman, 'Spearman')
-
-        return pearson, kendall, spearman

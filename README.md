@@ -2,54 +2,87 @@
 
 ## Description
 
-General use, **pipeline-oriented** machine learning framework.
+General use, **pipeline-oriented** ML platform built on top of sklearn.
 Lets user configure pipelines, load data, and evaluate pipeline against data. Who's said that improvising over `Giant Steps` has to be hard? This framework eases and standardizes research process. User can focus on configuring pipeline, or implementing core pipeline elements.
 
 ## Features
 
+- processing research batches
+- some nice plots by plotly
+- data wrappers and loaders
+
 ### Data set loaders
 
-#### plain `.csv`
+#### Plain `.csv`
 
 - single label
 
-### Logging
-
-- fitted pipelines
-- validation metrics
-- aggregated validation metrics
-- confusion matrix for each split
-
 ## Getting started
 
-```shell
+```sh
 pip install coltrane
 ```
 
-## Example
+
+## Inspection
+
+Load data set.
 
 ```py
 from pathlib import Path
 
-from sklearn.metrics import (accuracy_score, f1_score, precision_score,
-                             recall_score)
+from coltrane.classification import Inspector
+from coltrane.file.io.csv.single import Data
+
+__LOG = Path('log')
+__DATA_IRIS = Path('coltrane/test/data/iris.csv')
+__RANDOM_STATE = 45625461
+
+data = Data(path=__DATA_IRIS)
+```
+
+Create `Inspector` instance and run inspection. This will output some stats to provided output directory.
+
+```py
+inspector = Inspector()
+summary = inspector.inspect(data, output=__LOG)
+```
+
+You can access some additional stats and plot them.
+
+```py
+
+# this one's useful for cost-sensitive learning
+class_balance = inspector.get_class_balance(data)
+inspector.plot_class_balance(class_balance)
+```
+
+Check notebook examples for more.
+
+## Processing
+
+```py
+from pathlib import Path
+
+from sklearn.metrics import (accuracy_score, f1_score, make_scorer,
+                             precision_score, recall_score)
 from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from coltrane import Batch
-from coltrane.classification import Inspector, Processor
+from coltrane.classification import Processor
 from coltrane.file.io.csv.single import Data
 
 
 __LOG = Path('log')
-__DATA_IRIS = Path('/data/iris.csv')
+__DATA_IRIS = Path('coltrane/test/data/iris.csv')
 __RANDOM_STATE = 45625461
 
 
 batch = Batch(
-    data,
+    Data(path=__DATA_IRIS),
     pipeline=Pipeline(
         steps=[
             ('standard-scaler', StandardScaler()),
@@ -70,14 +103,8 @@ batch = Batch(
     encoder=LabelEncoder()
 )
 
-
-inspector = Inspector()
-inspector.inspect([data], output=__LOG)
-
 processor = Processor()
-processor.process([batch], output=__LOG)
-
-
+stats = processor.process(batch, output=__LOG)
 ```
 
 ### Authors
