@@ -8,8 +8,6 @@ from austen import Logger
 from coltrane.file.io.base import Data
 from coltrane.util import Plot
 
-init()
-
 
 class Inspector(ABC):
 
