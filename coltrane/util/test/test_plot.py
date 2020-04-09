@@ -47,8 +47,8 @@ def test_metrics(plot: Plot):
         'precision': np.random.uniform(size=50),
         'recall': np.random.uniform(size=50),
         'f1': np.random.uniform(size=50),
-        'mse': np.random.uniform(low=-10, high=10, size=50),
-        'foo': np.random.uniform(low=0, high=10, size=50),
+        'mse': np.random.normal(loc=0, scale=1, size=50),
+        'foo': np.random.poisson(lam=2, size=50),
     }
 
     plot.scores(scores)

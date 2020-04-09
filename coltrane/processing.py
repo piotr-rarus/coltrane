@@ -1,19 +1,19 @@
 import itertools
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from multiprocessing import Pool
 from pathlib import Path
-from timeit import default_timer as timer
-from typing import List
+from typing import Dict, List
 
 from austen import Logger
-from colorama import init
+from sklearn.metrics._scorer import _BaseScorer
+from sklearn.pipeline import Pipeline
 from tqdm.auto import tqdm
 
-from coltrane import Batch, util
-from coltrane.util import Plot
+from coltrane import Batch
 from coltrane.file.io.base import Data
-
-init()
+from coltrane.util import Plot
+from coltrane.util.stats import BatchStats, SplitStats
 
 
 class Processor(ABC):
@@ -34,17 +34,7 @@ class Processor(ABC):
     ):
         pass
 
-    @abstractmethod
-    def __post_pipeline(
-        self,
-        stats: util.pipeline.Stats,
-        logger: Logger,
-        *args,
-        **kwargs
-    ):
-        pass
-
-    def process(self, batch: Batch, output: Path) -> util.pipeline.Stats:
+    def process(self, batch: Batch, output: Path) -> BatchStats:
 
         # batch.pprint()
 
@@ -55,9 +45,7 @@ class Processor(ABC):
 
             stats = self._process_batch(batch, logger)
 
-            logger.add_entry('summary', stats.aggregated_scores)
-            logger.add_entry('performance', stats.aggregated_performance)
-            self.plot.metrics(stats.grouped_scores)
+            self.plot.scores(stats.grouped_scores)
 
             return stats
 
@@ -65,7 +53,7 @@ class Processor(ABC):
         self,
         batch: Batch,
         logger: Logger
-    ) -> util.pipeline.Stats:
+    ) -> BatchStats:
 
         if batch.encoder:
             batch.encoder.fit(batch.data.y)
@@ -88,10 +76,7 @@ class Processor(ABC):
 
         splits_stats = starmap(self._process_split, splits_iter)
 
-        pipeline_stats = util.pipeline.Stats(list(splits_stats))
-        self.__post_pipeline(pipeline_stats, logger)
-
-        return pipeline_stats
+        return BatchStats(list(splits_stats))
 
     def _process_split(
         self,
@@ -100,7 +85,7 @@ class Processor(ABC):
         train_index: List[int],
         test_index: List[int],
         logger: Logger
-    ) -> util.split.Stats:
+    ) -> SplitStats:
 
         with logger.get_child(str(split_index)) as logger:
 
@@ -119,23 +104,29 @@ class Processor(ABC):
                 y_train = encoder.transform(y_train)
                 y_test = encoder.transform(y_test)
 
-            start = timer()
             pipeline.fit(x_train, y_train)
-            end = timer()
-            dt_fit = end - start
 
-            performance = util.split.Performance(
-                dt_fit,
-                # dt_predict,
-                # dt_predict_record
-            )
-
-            scores = util.metric.evaluate(scorers, pipeline, x_test, y_test)
+            scores = self.__evaluate_metrics(scorers, pipeline, x_test, y_test)
 
             logger.add_entry('scores', scores)
-            logger.add_entry('performance', performance.as_dict())
             logger.save_obj(pipeline, 'pipeline')
 
             # self.__post_split(data, y_test, pred_y, logger)
 
-            return util.split.Stats(scores, performance)
+            return SplitStats(scores, deepcopy(pipeline))
+
+    def __evaluate_metrics(
+        self,
+        scorers: Dict[str, _BaseScorer],
+        pipeline: Pipeline,
+        x_test,
+        y_test
+    ):
+        stats = {}
+
+        for name, scorer in scorers.items():
+
+            score = scorer(pipeline, x_test, y_test)
+            stats[name] = score
+
+        return stats

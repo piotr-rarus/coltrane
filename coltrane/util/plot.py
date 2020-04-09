@@ -1,14 +1,13 @@
-from typing import Dict
+# flake8: noqa
+
+from typing import Dict, List
 
 import numpy as np
-# flake8: noqa
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.offline as pyo
 from sklearn.decomposition import PCA
-from collections import OrderedDict
 
 
 class Plot:
@@ -142,13 +141,13 @@ class Plot:
             image_height=self.IMAGE_HEIGHT
         )
 
-    def scores(self, scores: dict, filename: str = ''):
+    def scores(self, scores: Dict[str, List[float]], filename: str = ''):
         """
         Plots and dumps scores.
 
         Parameters
         ----------
-        metrics : dict
+        metrics : Dict[str, List[float]]
             Grouped scores dictionary, by metric name.
         """
 
@@ -162,13 +161,19 @@ class Plot:
                 other[metric] = values
 
         if normalized:
-            self.boxplot(normalized)
+            if len(normalized) == 1:
+                # TODO: looks ugly, but it's time to sleep
+                for metric, values in normalized.items():
+                    self.distribution(values, name=metric)
+
+            else:
+                self.boxplot(normalized)
 
         if other:
             for metric, values in other.items():
-                self.boxplot({metric: values})
+                self.distribution(values, name=metric)
 
-    def boxplot(self, data: dict, filename: str = ''):
+    def boxplot(self, data: Dict[str, List[float]], filename: str = ''):
 
         fig = go.Figure()
 
@@ -180,6 +185,23 @@ class Plot:
                     name=metric
                 )
             )
+
+        pyo.iplot(
+            fig,
+            filename=filename,
+            image_width=self.IMAGE_WIDTH,
+            image_height=self.IMAGE_HEIGHT
+        )
+
+    def distribution(self, data: List[float], name: str='', filename: str = ''):
+        fig = px.histogram(
+            x=data,
+            marginal='rug'
+        )
+
+        fig.update_layout(
+            title=name,
+        )
 
         pyo.iplot(
             fig,

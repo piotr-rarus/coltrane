@@ -15,6 +15,9 @@ from coltrane.file.io.base import Data
 
 @dataclass(frozen=True)
 class Batch:
+    """
+    Define your research with this class.
+    """
 
     data: Data
     pipeline: Pipeline
@@ -25,13 +28,21 @@ class Batch:
 
     @lazy
     def as_nice_hash(self) -> str:
+        """
+        Short identifier of the batch. Logs will appear under it.
+
+        Returns
+        -------
+        str
+        """
+
         encoded = str(id(self)).encode("utf-8")
         return blake2b(encoded, digest_size=4).hexdigest()
 
     @lazy
     def as_dict(self):
         """
-        Pipeline's config summary.
+        Batch config summary.
 
         Returns
         -------

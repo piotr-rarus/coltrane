@@ -69,7 +69,6 @@ class Inspector(ABC):
 
             return summary
 
-
     def calculate_correlation(self, data: Data, method: str = 'pearson'):
         data = data.xy
         corr = data.corr(method=method)
