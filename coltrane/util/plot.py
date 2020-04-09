@@ -1,17 +1,14 @@
+from typing import Dict
+
 import numpy as np
 # flake8: noqa
 import pandas as pd
-import seaborn as sns
-from sklearn.decomposition import PCA
-
-import numpy as np
+import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.offline as pyo
-from typing import Iterator, Dict
-import itertools
-import plotly.express as px
-
+from sklearn.decomposition import PCA
+from collections import OrderedDict
 
 
 class Plot:
@@ -31,22 +28,26 @@ class Plot:
             pyo.init_notebook_mode(connected=False)
             pio.renderers.default = 'notebook'
 
-    def class_balance(self, balance: Dict[str, int], filename='class_balance'):
+    def class_balance(
+        self,
+        class_balance: Dict[str, int],
+        filename='class_balance'
+    ):
         """
-        Plots and dumps labels distribution.
-
+        Plots class balance.
+        
         Parameters
         ----------
-        labels : Iterator[str]
-            Ground truth label for each record.
-        plot_name : string
-            Dumped file name.
+        class_balance : Dict[str, int]
+            Record count for each label by name.
+        filename : str, optional
+            Plotly artifact.
         """
 
-        # labels = sorted(labels)
+        class_balance = dict(sorted(class_balance.items()))
 
-        labels = list(balance.keys())
-        counts = list(balance.values())
+        labels = list(class_balance.keys())
+        counts = list(class_balance.values())
 
         fig = go.Figure()
 
@@ -59,6 +60,8 @@ class Plot:
 
         fig.add_trace(bars)
 
+        fig.update_layout(title='Class balance')
+
         pyo.iplot(
             fig,
             filename=filename,
@@ -66,35 +69,40 @@ class Plot:
             image_height=self.IMAGE_HEIGHT
         )
 
+    # TODO 3d scatter plot
     def features_distribution(
         self,
-        records: np.ndarray,
-        labels: np.ndarray,
+        x: np.ndarray,
+        y: np.ndarray,
         filename='features_distribution'
     ):
         """
         Plots features distribution.
         This method uses PCA algorithm to decompose features space.
-        Each label comes with it's unique color.
 
         Parameters
         ----------
-        records : nd.array
+        x : nd.array
             Records from your data set.
-        labels : nd.array
+        y : nd.array
             Respective labels for each of the records.
         """
 
-        if records.shape[1] > 2:
+        if x.shape[1] > 2:
             decomposer = PCA(n_components=2)
-            records = decomposer.fit(records).transform(records)
+            records = decomposer.fit(x).transform(x)
 
-        labels = np.reshape(labels, (len(labels), 1))
+        x0 = x[:, 0]
+        x1 = x[:, 1]
 
-        data_frame = np.concatenate([records, labels], axis=1)
-        data_frame = pd.DataFrame(data_frame, columns=['x', 'y', 'label'])
+        y = [str(label) for label in y]
 
-        fig = px.scatter(data_frame, x='x', y='y', color='label')
+        fig = px.scatter(x=x0, y=x1, color=y)
+
+        fig.update_layout(
+            title='Features distribution',
+            legend_title='Label'
+        )
 
         pyo.iplot(
             fig,
@@ -106,7 +114,7 @@ class Plot:
 
     def heatmap(
         self,
-        data: pd.DataFrame,
+        data: np.ndarray,
         plot_name: str,
         ylabel='',
         xlabel='',
@@ -114,12 +122,10 @@ class Plot:
     ):
         fig = go.Figure()
 
-        columns = list(data.columns)
-
         heatmap = go.Heatmap(
-            z=data.to_numpy(),
-            y=columns,
-            x=columns,
+            z=data,
+            y=ylabel,
+            x=xlabel,
             colorscale='Viridis'
         )
 
@@ -136,20 +142,20 @@ class Plot:
             image_height=self.IMAGE_HEIGHT
         )
 
-    def metrics(self, metrics: dict, filename: str = ''):
+    def scores(self, scores: dict, filename: str = ''):
         """
-        Plots and dumps aggregated metrics.
+        Plots and dumps scores.
 
         Parameters
         ----------
         metrics : dict
-            Regrouped metrics dictionary, by label, by measure.
+            Grouped scores dictionary, by metric name.
         """
 
         normalized = {}
         other = {}
 
-        for metric, values in metrics.items():
+        for metric, values in scores.items():
             if np.max(values) <= 1.0:
                 normalized[metric] = values
             else:
@@ -159,7 +165,8 @@ class Plot:
             self.boxplot(normalized)
 
         if other:
-            self.boxplot(other)
+            for metric, values in other.items():
+                self.boxplot({metric: values})
 
     def boxplot(self, data: dict, filename: str = ''):
 

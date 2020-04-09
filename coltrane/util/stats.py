@@ -1,38 +1,44 @@
 from dataclasses import dataclass
-from typing import List
+from typing import Dict, List
 
-import numpy as np
 from lazy import lazy
+from sklearn.pipeline import Pipeline
 
 
-@dataclass(frozen=True)
-class Stats:
-    values: List[float]
+@dataclass(init=True)
+class SplitStats():
+    scores: Dict[str, float]
+    pipeline: Pipeline
 
-    @lazy
-    def percentiles(self):
 
-        percentiles = []
-
-        for p in range(0, 101, 10):
-            value_at_p = np.percentile(self.values, p)
-            percentiles.append(value_at_p)
-
-        return percentiles
+@dataclass()
+class BatchStats():
+    splits: List[SplitStats]
 
     @lazy
-    def mean(self):
-        return np.mean(self.values)
+    def grouped_scores(self) -> Dict[str, List[float]]:
+        """
+        Groups evaluated scores from each split by name.
 
-    @lazy
-    def std(self):
-        return np.std(self.values)
+        Returns
+        -------
+        Dict[str, List[float]]
+            [description]
+        """
 
-    @lazy
-    def as_dict(self):
-        stats = {}
-        stats['mean'] = self.mean
-        stats['std'] = self.std
-        stats['percentiles'] = self.percentiles
+        if not self.splits:
+            return {}
 
-        return stats
+        scores = [split.scores for split in self.splits]
+
+        grouped = {}
+
+        for split_scores in scores:
+            for metric, value in split_scores.items():
+
+                if metric not in grouped:
+                    grouped[metric] = []
+
+                grouped[metric].append(value)
+
+        return grouped
