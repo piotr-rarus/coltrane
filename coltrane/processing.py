@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from copy import deepcopy
 from multiprocessing import Pool
 from pathlib import Path
+from timeit import default_timer
 from typing import Dict, List
 
 from austen import Logger
@@ -45,7 +46,7 @@ class Processor(ABC):
 
             stats = self._process_batch(batch, logger)
 
-            self.plot.scores(stats.grouped_scores)
+            # self.plot.scores(stats.grouped_scores)
 
             return stats
 
@@ -104,7 +105,10 @@ class Processor(ABC):
                 y_train = encoder.transform(y_train)
                 y_test = encoder.transform(y_test)
 
+            start = default_timer()
             pipeline.fit(x_train, y_train)
+            end = default_timer()
+            dt_fit = end - start
 
             scores = self.__evaluate_metrics(scorers, pipeline, x_test, y_test)
 
@@ -113,7 +117,7 @@ class Processor(ABC):
 
             # self.__post_split(data, y_test, pred_y, logger)
 
-            return SplitStats(scores, deepcopy(pipeline))
+            return SplitStats(scores, deepcopy(pipeline), dt_fit)
 
     def __evaluate_metrics(
         self,
