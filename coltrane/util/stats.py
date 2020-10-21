@@ -9,6 +9,7 @@ from sklearn.pipeline import Pipeline
 class SplitStats():
     scores: Dict[str, float]
     pipeline: Pipeline
+    dt_fit: float
 
 
 @dataclass()

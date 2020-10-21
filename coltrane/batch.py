@@ -74,8 +74,21 @@ class Batch:
     def pipeline_as_dict(self) -> Dict:
         as_dict = {}
 
+        # TODO: take only serializable vars
         for name, step in self.pipeline.steps:
-            as_dict[name] = vars(step)
+            variables = vars(step)
+            variables = {
+                key: value
+                for key, value in variables.items()
+                if (
+                    isinstance(value, str)
+                    or isinstance(value, float)
+                    or isinstance(value, int)
+                )
+
+            }
+
+            as_dict[name] = variables
 
         return as_dict
 
